@@ -1,7 +1,7 @@
 'use client'
 
 import { Clock, ShieldAlert, LogOut } from 'lucide-react'
-import { signOut } from '@/app/actions'
+import { signOut } from '../../actions'
 
 export default function PendingAgentPage() {
   return (

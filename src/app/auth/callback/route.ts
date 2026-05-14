@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
         if (profile?.role === 'admin') return NextResponse.redirect(`${origin}/admin`)
         if (profile?.role === 'agent') return NextResponse.redirect(`${origin}/agent`)
-        if (profile?.role === 'pending_agent') return NextResponse.redirect(`${origin}/pending`)
+        if (profile?.role === 'pending_agent') return NextResponse.redirect(`${origin}/agent/pending`)
         
         return NextResponse.redirect(`${origin}/dashboard`)
     }

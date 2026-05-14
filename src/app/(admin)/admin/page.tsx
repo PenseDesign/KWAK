@@ -1,7 +1,7 @@
-import { getAdminStats, getPendingAgents } from '@/app/actions'
-import { createClient } from '@/lib/supabase/server'
+import { getAdminStats, getPendingAgents } from '../../actions'
+import { createClient } from '../../../lib/supabase/server'
 import { Activity, Users, DollarSign, Package } from 'lucide-react'
-import { PendingAgents } from '@/components/admin/PendingAgents'
+import { PendingAgents } from '../../../components/admin/PendingAgents'
 
 export const revalidate = 0 // always fetch fresh on page load
 

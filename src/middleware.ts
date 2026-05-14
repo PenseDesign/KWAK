@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value, options))
+                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set({ name, value, ...options }))
                     response = NextResponse.next({
                         request: {
                             headers: request.headers,
@@ -71,15 +71,15 @@ export async function middleware(request: NextRequest) {
 
             const role = profile?.role
 
-            if (role === 'pending_agent' && request.nextUrl.pathname !== '/pending') {
-                return NextResponse.redirect(new URL('/pending', request.url))
+            if (role === 'pending_agent' && request.nextUrl.pathname !== '/agent/pending') {
+                return NextResponse.redirect(new URL('/agent/pending', request.url))
             }
 
             if (request.nextUrl.pathname.startsWith('/admin') && role !== 'admin') {
                 return NextResponse.redirect(new URL('/dashboard', request.url))
             }
             if (request.nextUrl.pathname.startsWith('/agent') && role !== 'agent' && role !== 'admin') {
-                if (role === 'pending_agent') return NextResponse.redirect(new URL('/pending', request.url))
+                if (role === 'pending_agent') return NextResponse.redirect(new URL('/agent/pending', request.url))
                 return NextResponse.redirect(new URL('/dashboard', request.url))
             }
         }

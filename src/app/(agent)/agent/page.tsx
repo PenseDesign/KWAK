@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { getAgentTournee, signOut } from '@/app/actions'
-import { createClient } from '@/lib/supabase/client'
-import { useSync } from '@/hooks/offline/useSync'
-import { optimizeRoute } from '@/lib/tournee/engine'
+import { getAgentTournee, signOut } from '../../actions'
+import { createClient } from '../../../lib/supabase/client'
+import { useSync } from '../../../hooks/offline/useSync'
+import { optimizeRoute } from '../../../lib/tournee/engine'
 import { MapPin, Download, CheckCircle, Camera, Loader2, LogOut, Phone as PhoneIcon, MessageSquare } from 'lucide-react'
-import { ClientMission } from '@/lib/types/database'
+import { ClientMission } from '../../../lib/types/database'
 
 export default function AgentPage() {
   const [loading, setLoading] = useState(false)

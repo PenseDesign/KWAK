@@ -1,9 +1,9 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '../lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
-import { Passage, Tournee, ClientMission } from '@/lib/types/database'
+import { Passage, Tournee, ClientMission } from '../lib/types/database'
 
 export async function getAgentTournee(agentId: string) {
   const supabase = await createClient()
@@ -125,16 +125,26 @@ export async function getClientStatus(clientId: string) {
   // Chercher le prochain passage prévu
   const { data: nextPassage } = await supabase
     .from('passages')
-    .select('*, tournees(date)')
+    .select('date_prevue')
     .eq('client_id', clientId)
     .eq('status', 'en_attente')
-    .order('tournees(date)', { ascending: true })
+    .order('date_prevue', { ascending: true })
     .limit(1)
     .single()
 
+  // Récupérer l'historique des passages validés
+  const { data: historique } = await supabase
+    .from('passages')
+    .select('*')
+    .eq('client_id', clientId)
+    .eq('status', 'valide')
+    .order('heure_passage', { ascending: false })
+    .limit(5)
+
   return { 
     abonnement, 
-    nextPassageDate: nextPassage?.tournees?.date || null 
+    nextPassageDate: nextPassage?.date_prevue || null,
+    historique: historique || []
   }
 }
 
@@ -172,31 +182,45 @@ export async function getAdminStats() {
 }
 
 export async function signIn(formData: FormData) {
-  const email = formData.get('email') as string
+  const login = formData.get('login') as string // Peut être email ou téléphone
   const password = formData.get('password') as string
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  let authParams: any = { password }
+  if (login.includes('@')) {
+    authParams.email = login
+  } else {
+    authParams.phone = login
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword(authParams)
 
   if (error) {
     return { success: false, error: error.message }
   }
 
-  // Récupérer le rôle pour savoir où rediriger
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = data.user
   if (user) {
-    const { data: profile } = await supabase
+    // Vérifier / Récupérer le profil
+    let { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
+    // SÉCURITÉ : Si le profil n'existe pas encore (bug trigger), on le crée
+    if (!profile) {
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .insert({ id: user.id, role: 'client' })
+        .select()
+        .single()
+      profile = newProfile
+    }
+
     if (profile?.role === 'admin') redirect('/admin')
     if (profile?.role === 'agent') redirect('/agent')
-    if (profile?.role === 'pending_agent') redirect('/pending')
+    if (profile?.role === 'pending_agent') redirect('/agent/pending')
   }
 
   redirect('/dashboard')
