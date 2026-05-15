@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn } from '@/app/actions'
 import { Lock, Loader2, ArrowRight, User } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -29,11 +30,11 @@ export default function LoginPage() {
         
         {/* Logo & Header */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-600 rounded-3xl shadow-lg shadow-green-200 rotate-3">
-            <span className="text-white text-3xl font-black italic tracking-tighter">KW!</span>
-          </div>
+          <Link href="/" className="inline-block">
+            <Image src="/logo.png" alt="LePointCitoyen" width={80} height={80} />
+          </Link>
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bienvenue sur KWAK</h1>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bienvenue sur LEPOINCITOYEN</h1>
             <p className="text-slate-500 font-medium">Connectez-vous pour gérer vos collectes</p>
           </div>
         </div>

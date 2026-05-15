@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signUp } from '@/app/actions'
 import { Lock, Mail, Loader2, ArrowRight, User, Home, Truck, Phone } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
@@ -56,12 +57,12 @@ export default function RegisterPage() {
         
         {/* Header */}
         <div className="text-center space-y-4">
-          <Link href="/" className="inline-flex items-center justify-center w-20 h-20 bg-green-600 rounded-3xl shadow-lg shadow-green-200 rotate-3">
-            <span className="text-white text-3xl font-black italic tracking-tighter">KW!</span>
+          <Link href="/" className="inline-block">
+            <Image src="/logo.png" alt="LePointCitoyen" width={80} height={80} />
           </Link>
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Créer un compte</h1>
-            <p className="text-slate-500 font-medium">Rejoignez la communauté KWAK aujourd'hui</p>
+            <p className="text-slate-500 font-medium">Rejoignez la communauté LEPOINCITOYEN aujourd'hui</p>
           </div>
         </div>
 

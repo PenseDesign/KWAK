@@ -16,7 +16,7 @@ export default function PendingAgentPage() {
         <div className="space-y-4">
           <h1 className="text-3xl font-black text-white tracking-tight">Compte en attente</h1>
           <p className="text-slate-400 font-medium leading-relaxed">
-            Merci pour votre inscription en tant qu'Agent KWAK ! <br/>
+            Merci pour votre inscription en tant qu'Agent LEPOINCITOYEN ! <br/>
             Votre profil est actuellement en cours de vérification par notre équipe administrative.
           </p>
         </div>

@@ -25,7 +25,7 @@ export default async function AdminPage() {
     <div className="min-h-screen bg-slate-50 p-6">
       <header className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Tableau de Bord Admin</h1>
-        <p className="text-slate-500">Supervision globale KWAK</p>
+        <p className="text-slate-500">Supervision globale LEPOINCITOYEN</p>
       </header>
 
       <div className="grid lg:grid-cols-2 gap-8 mb-10">

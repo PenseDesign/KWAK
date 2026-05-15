@@ -20,6 +20,7 @@ import {
   Info,
 } from 'lucide-react'
 import { createClient } from '../../../lib/supabase/client'
+import Image from 'next/image'
 
 export default function ClientDashboard() {
   const [loading, setLoading] = useState(true)
@@ -82,10 +83,8 @@ export default function ClientDashboard() {
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center rotate-3">
-                <span className="text-white font-black italic text-lg">K!</span>
-             </div>
-             <span className="text-xl font-black tracking-tighter">KWAK Dashboard</span>
+             <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
+             <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
           </div>
           <div className="flex items-center gap-2">
             <a 
@@ -147,7 +146,7 @@ export default function ClientDashboard() {
                   <p className="text-green-200 font-bold text-xs tracking-widest uppercase">Action requise</p>
                   <h2 className="text-2xl font-black leading-tight">Vous n'avez pas encore d'abonnement actif</h2>
                   <p className="text-green-100 text-sm font-medium opacity-90">
-                    Souscrivez dès maintenant pour profiter des collectes KWAK à domicile.
+                    Souscrivez dès maintenant pour profiter des collectes LEPOINCITOYEN à domicile.
                   </p>
                 </div>
                 <a

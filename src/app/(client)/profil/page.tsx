@@ -125,7 +125,7 @@ export default function ProfilPage() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <span className="text-lg font-black tracking-tighter">Mon Profil KWAK</span>
+          <span className="text-lg font-black tracking-tighter">Mon Profil LEPOINCITOYEN</span>
           <div className="w-10" /> {/* Spacer */}
         </div>
       </div>

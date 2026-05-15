@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { createDemandeAbonnement } from '../../actions'
+import Image from 'next/image'
 import {
   CheckCircle2,
   ArrowRight,
@@ -113,10 +114,8 @@ export default function SubscribePage() {
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center rotate-3">
-              <span className="text-white font-black italic text-lg">K!</span>
-            </div>
-            <span className="text-xl font-black tracking-tighter">KWAK — Abonnement</span>
+              <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
+            <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN — Abonnement</span>
           </div>
           {step === 'paiement' && (
             <button
@@ -284,7 +283,7 @@ export default function SubscribePage() {
                   }`}>
                     {OPERATEURS.find(o => o.id === selectedOperateur)?.number}
                   </div>
-                  <p>3. Dans le motif, indiquez : <strong>KWAK - {selectedForfait.label}</strong></p>
+                  <p>3. Dans le motif, indiquez : <strong>LPC - {selectedForfait.label}</strong></p>
                   <p>4. Entrez votre numéro de téléphone ci-dessous et soumettez la demande.</p>
                 </div>
               </div>

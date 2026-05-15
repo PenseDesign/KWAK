@@ -259,8 +259,7 @@ export async function signUp(formData: FormData) {
     // Créer le profil avec le bon rôle et le numéro de téléphone
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ role, phone }) 
-      .eq('id', data.user.id)
+      .upsert({ id: data.user.id, role, phone }) 
 
     if (profileError) console.error("Error updating profile:", profileError)
   }
