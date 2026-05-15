@@ -26,9 +26,8 @@ export default function ProfilPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   
   const router = useRouter()
-  const supabase = createClient()
-
   useEffect(() => {
+    const supabase = createClient()
     async function getProfile() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -47,7 +46,7 @@ export default function ProfilPage() {
       setLoading(false)
     }
     getProfile()
-  }, [router, supabase])
+  }, [router])
 
   const handleGetGps = () => {
     setGpsLoading(true)
