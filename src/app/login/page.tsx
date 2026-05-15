@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { signIn } from '@/app/actions'
-import { Lock, Mail, Loader2, ArrowRight, User } from 'lucide-react'
-import Image from 'next/image'
+import { Lock, Loader2, ArrowRight, User } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -101,9 +101,17 @@ export default function LoginPage() {
         </div>
 
         {/* Footer info */}
-        <p className="text-center text-sm text-slate-400 font-medium">
-          Besoin d'aide ? <a href="#" className="text-green-600 hover:underline">Contactez le support</a>
-        </p>
+        <div className="text-center space-y-2">
+          <p className="text-sm text-slate-500 font-medium">
+            Pas encore de compte ?{' '}
+            <Link href="/register" className="text-green-600 font-bold hover:underline">
+              S'inscrire
+            </Link>
+          </p>
+          <p className="text-sm text-slate-400">
+            Besoin d'aide ? <a href="#" className="text-green-600 hover:underline">Contactez le support</a>
+          </p>
+        </div>
 
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getClientStatus, reportIssue, signOut } from '../../actions'
 import { 
   AlertTriangle, 
@@ -13,7 +14,10 @@ import {
   ArrowRight,
   ShieldCheck,
   CreditCard,
-  Phone
+  Phone,
+  Sparkles,
+  User,
+  Info,
 } from 'lucide-react'
 import { createClient } from '../../../lib/supabase/client'
 
@@ -23,6 +27,8 @@ export default function ClientDashboard() {
   const [reporting, setReporting] = useState(false)
   const [reportSuccess, setReportSuccess] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const searchParams = useSearchParams()
+  const isPendingSubscription = searchParams.get('subscribed') === 'pending'
 
   useEffect(() => {
     const supabase = createClient()
@@ -81,12 +87,21 @@ export default function ClientDashboard() {
              </div>
              <span className="text-xl font-black tracking-tighter">KWAK Dashboard</span>
           </div>
-          <button 
-            onClick={() => signOut()}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all hover:bg-red-50"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <a 
+              href="/profil"
+              className="p-2.5 bg-slate-50 text-slate-500 hover:text-green-600 rounded-xl transition-all hover:bg-green-50"
+              title="Mon Profil"
+            >
+              <User className="w-5 h-5" />
+            </a>
+            <button 
+              onClick={() => signOut()}
+              className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all hover:bg-red-50"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -120,6 +135,72 @@ export default function ClientDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Subscription Banner — shown if no active subscription */}
+          {!isPendingSubscription && abonnement?.status !== 'actif' && (
+            <div className="bg-gradient-to-br from-green-600 to-green-800 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-green-200 relative overflow-hidden">
+              <div className="absolute -right-8 -top-8 opacity-10">
+                <Sparkles className="w-48 h-48" />
+              </div>
+              <div className="relative z-10 space-y-5">
+                <div className="space-y-2">
+                  <p className="text-green-200 font-bold text-xs tracking-widest uppercase">Action requise</p>
+                  <h2 className="text-2xl font-black leading-tight">Vous n'avez pas encore d'abonnement actif</h2>
+                  <p className="text-green-100 text-sm font-medium opacity-90">
+                    Souscrivez dès maintenant pour profiter des collectes KWAK à domicile.
+                  </p>
+                </div>
+                <a
+                  href="/subscribe"
+                  id="cta-subscribe"
+                  className="inline-flex items-center gap-2 bg-white text-green-700 font-black py-3 px-6 rounded-2xl hover:bg-green-50 transition-colors shadow-lg"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  Souscrire maintenant
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Pending subscription confirmation */}
+          {isPendingSubscription && (
+            <div className="bg-blue-50 border border-blue-200 rounded-[2rem] p-7 flex items-start gap-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 shrink-0">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-black text-blue-900 text-lg">Demande envoyée avec succès !</p>
+                <p className="text-blue-700 text-sm font-medium">
+                  Votre abonnement sera activé dans les <strong>24h</strong> après vérification du paiement.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Profile Incomplete Alert */}
+          {!statusData?.profile?.repere_textuel && (
+            <div className="bg-amber-50 border border-amber-200 rounded-[2rem] p-7 flex items-start gap-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shrink-0">
+                <Info className="w-6 h-6" />
+              </div>
+              <div className="flex-1 space-y-3">
+                <div>
+                  <p className="font-black text-amber-900 text-lg">Profil incomplet</p>
+                  <p className="text-amber-700 text-sm font-medium">
+                    Veuillez renseigner votre <strong>adresse exacte</strong> pour que l'agent puisse vous trouver.
+                  </p>
+                </div>
+                <a
+                  href="/profil"
+                  className="inline-flex items-center gap-2 bg-amber-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-amber-700 transition-colors text-sm"
+                >
+                  Compléter mon profil
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          )}
 
           {/* Next Passage Large Card */}
           <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200 text-white relative overflow-hidden">

@@ -1,7 +1,10 @@
-import { getAdminStats, getPendingAgents } from '../../actions'
+import { getAdminStats, getPendingAgents, getPendingAbonnements } from '../../actions'
 import { createClient } from '../../../lib/supabase/server'
 import { Activity, Users, DollarSign, Package } from 'lucide-react'
 import { PendingAgents } from '../../../components/admin/PendingAgents'
+import { PendingAbonnements } from '../../../components/admin/PendingAbonnements'
+import { CreateTournee } from '../../../components/admin/CreateTournee'
+import { SignalementsList } from '../../../components/admin/SignalementsList'
 
 export const revalidate = 0 // always fetch fresh on page load
 
@@ -10,6 +13,7 @@ export default async function AdminPage() {
   const supabase = await createClient()
   
   const { agents: pendingAgents } = await getPendingAgents()
+  const { demandes: pendingDemandes } = await getPendingAbonnements()
   
   const { data: recentPassages } = await supabase
     .from('passages')
@@ -24,37 +28,37 @@ export default async function AdminPage() {
         <p className="text-slate-500">Supervision globale KWAK</p>
       </header>
 
-      <PendingAgents agents={pendingAgents} />
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="p-3 bg-green-100 text-green-600 rounded-xl">
-            <Package className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500">Total Collectes</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.totalCollectes}</p>
-          </div>
+      <div className="grid lg:grid-cols-2 gap-8 mb-10">
+        <div className="space-y-8">
+          <PendingAbonnements demandes={pendingDemandes} />
+          <PendingAgents agents={pendingAgents} />
+          <SignalementsList />
         </div>
+        
+        <div className="space-y-8">
+          <CreateTournee />
+          
+          {/* Stats Grid integrated into the side col */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+              <div className="p-3 bg-green-100 text-green-600 rounded-xl">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Collectes</p>
+                <p className="text-xl font-bold text-slate-900">{stats.totalCollectes}</p>
+              </div>
+            </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500">Revenus Estimés (FCFA)</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.revenusEstimes.toLocaleString()}</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-          <div className="p-3 bg-purple-100 text-purple-600 rounded-xl">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-500">Agents en ligne</p>
-            <p className="text-2xl font-bold text-slate-900">{stats.agentsEnLigne}</p>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+              <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Revenus (FCFA)</p>
+                <p className="text-xl font-bold text-slate-900">{stats.revenusEstimes.toLocaleString()}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
