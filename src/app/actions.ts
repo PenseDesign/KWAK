@@ -512,3 +512,45 @@ export async function resolveSignalement(id: string) {
   revalidatePath('/admin')
   return { success: true }
 }
+
+export async function getAllUsers() {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(`
+      *,
+      abonnements:abonnements(status, type_forfait)
+    `)
+    .order('created_at', { ascending: false })
+
+  return { success: !error, users: data || [] }
+}
+
+export async function getZonesStats() {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('repere_textuel, role')
+    .eq('role', 'client')
+    .not('repere_textuel', 'is', null)
+
+  if (error) return { success: false, zones: [] }
+
+  // Agréger par quartier
+  const zonesMap: Record<string, number> = {}
+  data.forEach((p: any) => {
+    // Prendre une approximation du quartier (ex: avant la virgule)
+    const zone = p.repere_textuel.split(',')[0].trim().toUpperCase()
+    if (zone) {
+      zonesMap[zone] = (zonesMap[zone] || 0) + 1
+    }
+  })
+
+  const zones = Object.entries(zonesMap)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+
+  return { success: true, zones }
+}

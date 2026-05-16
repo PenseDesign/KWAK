@@ -180,6 +180,7 @@ export default function LandingPage() {
                 src="/agent-back.png" 
                 alt="Agent LEPOINCITOYEN en mission dans les rues de Douala" 
                 fill 
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -195,6 +196,7 @@ export default function LandingPage() {
                 src="/agents-team.png" 
                 alt="Équipe d'agents LEPOINCITOYEN prêts pour la collecte" 
                 fill 
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -210,6 +212,7 @@ export default function LandingPage() {
                 src="/agents-tricycle.png" 
                 alt="Agents LEPOINCITOYEN avec leur véhicule de collecte" 
                 fill 
+                sizes="(max-width: 768px) 100vw, 33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

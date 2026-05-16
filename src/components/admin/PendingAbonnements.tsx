@@ -21,8 +21,8 @@ export function PendingAbonnements({ demandes }: { demandes: any[] }) {
   if (demandes.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-10">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-10">
+      <div className="p-6 border-b border-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard className="w-5 h-5 text-blue-500" />
           <h2 className="text-lg font-semibold text-slate-900">
@@ -34,9 +34,9 @@ export function PendingAbonnements({ demandes }: { demandes: any[] }) {
         </span>
       </div>
 
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-50">
         {demandes.map((demande) => (
-          <div key={demande.id} className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50 transition-colors">
+          <div key={demande.id} className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-slate-50/50 transition-colors">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center shrink-0">
                 <Smartphone className="w-6 h-6" />
@@ -60,7 +60,7 @@ export function PendingAbonnements({ demandes }: { demandes: any[] }) {
             <button
               onClick={() => handleActivate(demande.id)}
               disabled={isPending}
-              className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all disabled:opacity-50 shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 bg-green-50 text-green-700 rounded-xl font-bold text-sm hover:bg-green-100 transition-all disabled:opacity-50 shrink-0 border border-green-100"
             >
               {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

@@ -16,19 +16,19 @@ export function PendingAgents({ agents }: { agents: any[] }) {
     if (agents.length === 0) return null
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-10">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-10">
+            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-amber-500" />
                     <h2 className="text-lg font-semibold text-slate-900">Agents en attente ({agents.length})</h2>
                 </div>
             </div>
             
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-50">
                 {agents.map((agent) => (
-                    <div key={agent.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div key={agent.id} className="p-6 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400">
+                            <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center">
                                 <UserCheck className="w-6 h-6" />
                             </div>
                             <div>
@@ -41,12 +41,12 @@ export function PendingAgents({ agents }: { agents: any[] }) {
                             <button 
                                 onClick={() => handleApprove(agent.id)}
                                 disabled={isPending}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-all disabled:opacity-50"
+                                className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl font-bold text-sm hover:bg-green-100 transition-all disabled:opacity-50"
                             >
                                 {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
                                 Approuver
                             </button>
-                            <button className="p-2 bg-slate-100 text-slate-400 hover:text-red-500 rounded-xl transition-colors">
+                            <button className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-colors">
                                 <UserX className="w-5 h-5" />
                             </button>
                         </div>

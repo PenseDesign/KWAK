@@ -1,19 +1,27 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { getAgentTournee, signOut } from '../../actions'
+import { getAgentTournee, signOut, reportIssue } from '../../actions'
 import { createClient } from '../../../lib/supabase/client'
 import { useSync } from '../../../hooks/offline/useSync'
 import { optimizeRoute } from '../../../lib/tournee/engine'
-import { MapPin, Download, CheckCircle, Camera, Loader2, LogOut, Phone as PhoneIcon, MessageSquare } from 'lucide-react'
+import { MapPin, Download, CheckCircle, Camera, Loader2, LogOut, Phone as PhoneIcon, MessageSquare, AlertTriangle, Navigation, Upload } from 'lucide-react'
 import { ClientMission } from '../../../lib/types/database'
+import NetworkAlert from '../../../components/shared/NetworkAlert'
 
 export default function AgentPage() {
   const [loading, setLoading] = useState(false)
   const [activeMission, setActiveMission] = useState<ClientMission | null>(null)
   const [photoData, setPhotoData] = useState<string | null>(null)
+  
+  // Nouveaux états
+  const [reporting, setReporting] = useState(false)
+  const [reportSuccess, setReportSuccess] = useState(false)
+  const [cameraError, setCameraError] = useState(false)
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { cachedTournee, saveTournee, queuePassageValidation, offlineQueueCount, isSyncing } = useSync()
 
@@ -33,12 +41,15 @@ export default function AgentPage() {
     setLoading(true)
     try {
       const res = await getAgentTournee(agentId)
-      if (res.success && res.missions) {
+      if (res.success && res.missions && res.missions.length > 0) {
         const optimized = optimizeRoute(res.missions)
         await saveTournee(optimized)
+      } else {
+        alert("Aucune tournée n'est prévue pour vous aujourd'hui.")
       }
     } catch (e) {
       console.error(e)
+      alert("Erreur lors du téléchargement. Vérifiez votre connexion.")
     } finally {
       setLoading(false)
     }
@@ -46,13 +57,13 @@ export default function AgentPage() {
 
   // Camera handling
   useEffect(() => {
-    if (activeMission && !photoData) {
+    if (activeMission && !photoData && !cameraError) {
       startCamera()
     } else {
       stopCamera()
     }
     return () => stopCamera()
-  }, [activeMission, photoData])
+  }, [activeMission, photoData, cameraError])
 
   const startCamera = async () => {
     try {
@@ -60,8 +71,10 @@ export default function AgentPage() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
+      setCameraError(false)
     } catch (err) {
       console.error("Camera access denied or unavailable", err)
+      setCameraError(true)
     }
   }
 
@@ -85,6 +98,17 @@ export default function AgentPage() {
     }
   }
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPhotoData(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleValidate = async () => {
     if (!activeMission) return
     
@@ -93,137 +117,249 @@ export default function AgentPage() {
     // Reset state
     setActiveMission(null)
     setPhotoData(null)
+    setCameraError(false)
   }
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-4 pb-24">
-      <header className="mb-6 flex justify-between items-center">
-        <div className="flex justify-between items-start w-full">
-          <div>
-            <h1 className="text-2xl font-bold text-green-400">Mode Mission</h1>
-            <p className="text-slate-400 text-sm">{cachedTournee.length} passages prévus</p>
-          </div>
-          <button 
-            onClick={() => signOut()}
-            className="p-3 bg-slate-900 text-slate-500 hover:text-white rounded-2xl border border-slate-800 transition-colors shadow-lg"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div>
-        
-        {offlineQueueCount > 0 && (
-          <div className="flex items-center gap-2 bg-amber-900/50 text-amber-500 px-3 py-1 rounded-full text-xs font-medium border border-amber-800">
-            {isSyncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
-            {offlineQueueCount} en attente
-          </div>
-        )}
-      </header>
+  const handleReport = async () => {
+    if (!agentId) return
+    const reason = prompt("Décrivez le problème (ex: Tricycle en panne, Route bloquée) :")
+    if (!reason) return
+    
+    setReporting(true)
+    const res = await reportIssue(agentId, reason)
+    setReporting(false)
+    
+    if (res.success) {
+      setReportSuccess(true)
+      setTimeout(() => setReportSuccess(false), 3000)
+    } else {
+      alert("Erreur lors du signalement.")
+    }
+  }
 
-      {cachedTournee.length === 0 ? (
-        <div className="flex flex-col items-center justify-center mt-20 space-y-6">
-          <button 
-            onClick={handleDownloadTournee}
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-500 text-white w-48 h-48 rounded-full flex flex-col items-center justify-center gap-4 shadow-xl transition-all active:scale-95 disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-10 h-10 animate-spin" /> : <Download className="w-10 h-10" />}
-            <span className="font-semibold text-center">Télécharger<br/>ma tournée</span>
-          </button>
-          <p className="text-slate-500 text-sm text-center px-8">
-            Connectez-vous à internet le matin pour récupérer votre itinéraire de la journée.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {cachedTournee.map((mission, index) => {
-            const isCompleted = mission.passage_status === 'valide'
-            return (
-              <div 
-                key={mission.passage_id}
-                onClick={() => !isCompleted && setActiveMission(mission)}
-                className={`p-4 rounded-2xl border transition-all ${
-                  isCompleted 
-                    ? 'bg-slate-900/30 border-slate-800 opacity-60' 
-                    : 'bg-slate-900 border-slate-700 hover:border-green-500/50 cursor-pointer shadow-lg'
-                }`}
+  // Statistiques
+  const completedCount = cachedTournee.filter(m => m.passage_status === 'valide').length
+  const totalCount = cachedTournee.length
+  const progressPercentage = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100)
+
+  const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-50 pb-24 font-sans">
+      <NetworkAlert />
+
+      <div className="p-4">
+        <header className="mb-6 flex flex-col gap-4">
+          <div className="flex justify-between items-start w-full">
+            <div>
+              <h1 className="text-2xl font-black text-white">Mode Mission</h1>
+              <p className="text-green-400 font-medium capitalize">{today}</p>
+            </div>
+            <button 
+              onClick={() => signOut()}
+              className="p-3 bg-slate-900 text-slate-400 hover:text-white rounded-2xl border border-slate-800 transition-colors shadow-lg"
+              title="Déconnexion"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
+          
+          {offlineQueueCount > 0 && (
+            <div className="self-start flex items-center gap-2 bg-amber-900/50 text-amber-500 px-4 py-2 rounded-full text-sm font-bold border border-amber-800">
+              {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+              {offlineQueueCount} validations en attente de réseau
+            </div>
+          )}
+        </header>
+
+        {totalCount === 0 ? (
+          <div className="space-y-6">
+            <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 text-center space-y-6 shadow-2xl">
+              <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="w-10 h-10 text-slate-500" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-white">Aucune tournée chargée</h2>
+                <p className="text-slate-400 mt-2 font-medium">Vous n'avez pas encore téléchargé votre itinéraire du jour.</p>
+              </div>
+              <button 
+                onClick={handleDownloadTournee}
+                disabled={loading}
+                className="w-full bg-green-500 hover:bg-green-400 text-slate-950 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 flex flex-col items-center justify-center rounded-full font-bold text-lg ${
-                    isCompleted ? 'bg-green-900/50 text-green-500' : 'bg-green-500 text-slate-950'
-                  }`}>
-                    {isCompleted ? <CheckCircle className="w-5 h-5" /> : index + 1}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-200 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-slate-400" />
-                      {mission.repere_textuel || "Client " + mission.phone}
-                    </p>
-                    {mission.phone && !isCompleted && (
-                      <div className="flex gap-4 mt-2" onClick={(e) => e.stopPropagation()}>
-                        <a href={`tel:${mission.phone}`} className="text-xs font-bold text-green-400 flex items-center gap-1 hover:text-green-300">
-                          <PhoneIcon className="w-3.5 h-3.5" /> Appeler
-                        </a>
-                        <a href={`https://wa.me/${mission.phone.replace(/\s/g, '')}`} target="_blank" className="text-xs font-bold text-blue-400 flex items-center gap-1 hover:text-blue-300">
-                          <MessageSquare className="w-3.5 h-3.5" /> Message
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Download className="w-6 h-6" />}
+                Télécharger ma tournée
+              </button>
+            </div>
+
+            <div className="bg-red-950/30 border border-red-900/50 rounded-[2rem] p-6 space-y-4">
+              <div className="flex items-center gap-3 text-red-500">
+                <AlertTriangle className="w-6 h-6" />
+                <h3 className="font-bold">Un empêchement ?</h3>
+              </div>
+              <p className="text-sm text-red-200/70">Signalez un problème (panne, accident) à votre superviseur.</p>
+              <button 
+                onClick={handleReport}
+                disabled={reporting || reportSuccess}
+                className="w-full py-3 bg-red-900/50 text-red-400 hover:bg-red-900/80 rounded-xl font-bold transition-all disabled:opacity-50"
+              >
+                {reporting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : reportSuccess ? "Signalé avec succès" : "Signaler un problème"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Barre de progression */}
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] space-y-4 shadow-lg">
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-slate-400 font-bold text-sm uppercase tracking-wider">Progression</p>
+                  <p className="text-2xl font-black text-white">{completedCount} <span className="text-slate-500 text-lg">/ {totalCount}</span></p>
+                </div>
+                <div className="text-green-400 font-black text-xl">{progressPercentage}%</div>
+              </div>
+              <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                  style={{ width: `${progressPercentage}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite] -skew-x-12" />
                 </div>
               </div>
-            )
-          })}
-        </div>
-      )}
+            </div>
 
-      {/* Modal/Drawer pour la validation (Le conseil Yassa) */}
+            <div className="space-y-4">
+              {cachedTournee.map((mission, index) => {
+                const isCompleted = mission.passage_status === 'valide'
+                const gpsUrl = mission.coords_gps 
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${(mission.coords_gps as any).lat},${(mission.coords_gps as any).lng}`
+                  : null
+
+                return (
+                  <div 
+                    key={mission.passage_id}
+                    onClick={() => !isCompleted && setActiveMission(mission)}
+                    className={`p-5 rounded-[2rem] border transition-all ${
+                      isCompleted 
+                        ? 'bg-slate-900/40 border-slate-800/50 opacity-60' 
+                        : 'bg-slate-900 border-slate-700 hover:border-green-500/50 cursor-pointer shadow-xl'
+                    }`}
+                  >
+                    <div className="flex gap-4">
+                      <div className={`w-12 h-12 shrink-0 flex flex-col items-center justify-center rounded-2xl font-black text-xl ${
+                        isCompleted ? 'bg-green-900/30 text-green-500' : 'bg-green-500 text-slate-950 shadow-inner shadow-white/20'
+                      }`}>
+                        {isCompleted ? <CheckCircle className="w-6 h-6" /> : index + 1}
+                      </div>
+                      
+                      <div className="flex-1 space-y-3">
+                        <p className="font-bold text-slate-200 leading-tight">
+                          {mission.repere_textuel || "Client " + mission.phone}
+                        </p>
+                        
+                        {!isCompleted && (
+                          <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                            {gpsUrl && (
+                              <a href={gpsUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-blue-500/20 transition-colors">
+                                <Navigation className="w-4 h-4" /> Naviguer
+                              </a>
+                            )}
+                            {mission.phone && (
+                              <>
+                                <a href={`tel:${mission.phone}`} className="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-slate-700 transition-colors">
+                                  <PhoneIcon className="w-4 h-4" /> Appel
+                                </a>
+                                <a href={`https://wa.me/${mission.phone.replace(/\s/g, '')}`} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-green-500/20 transition-colors">
+                                  <MessageSquare className="w-4 h-4" /> WhatsApp
+                                </a>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modal/Drawer pour la validation */}
       {activeMission && (
         <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
-          <div className="flex-1 relative bg-black">
+          <div className="flex-1 relative bg-black flex items-center justify-center">
             {photoData ? (
               <img src={photoData} alt="Aperçu" className="w-full h-full object-cover" />
+            ) : cameraError ? (
+               <div className="text-center p-6 space-y-4">
+                 <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto">
+                    <AlertTriangle className="w-10 h-10 text-amber-500" />
+                 </div>
+                 <h3 className="text-white font-bold text-lg">Caméra indisponible</h3>
+                 <p className="text-slate-400 text-sm">Nous n'avons pas pu accéder à votre appareil photo. Veuillez importer une photo depuis votre galerie.</p>
+               </div>
             ) : (
               <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
             )}
             <canvas ref={canvasRef} className="hidden" />
 
-            {/* Overlay d'aide visuelle - L'appli dit où on est */}
-            <div className="absolute top-0 left-0 w-full p-4 bg-gradient-to-b from-black/80 to-transparent">
+            <div className="absolute top-0 left-0 w-full p-6 bg-gradient-to-b from-black/80 to-transparent">
               <button 
-                onClick={() => setActiveMission(null)}
-                className="text-white text-sm font-medium mb-4"
+                onClick={() => { setActiveMission(null); setCameraError(false); }}
+                className="text-white text-sm font-bold mb-6 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md"
               >
-                ← Retour
+                ← Annuler
               </button>
-              <h2 className="text-xl font-bold text-white">Prochain arrêt :</h2>
-              <p className="text-green-400 text-2xl font-black">{activeMission.repere_textuel}</p>
+              <h2 className="text-sm font-bold text-slate-300 uppercase tracking-widest">Arrêt {cachedTournee.findIndex(m => m.passage_id === activeMission.passage_id) + 1}</h2>
+              <p className="text-green-400 text-2xl font-black leading-tight mt-1">{activeMission.repere_textuel}</p>
             </div>
           </div>
 
-          <div className="p-6 bg-slate-900 rounded-t-3xl -mt-6 relative z-10 space-y-6">
+          <div className="p-6 bg-slate-900 rounded-t-[2.5rem] -mt-8 relative z-10 space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             {!photoData ? (
-              <button 
-                onClick={takePhoto}
-                className="w-full bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl flex items-center justify-center gap-2 font-medium"
-              >
-                <Camera className="w-5 h-5" />
-                Prendre la photo de façade
-              </button>
+              cameraError ? (
+                <div>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    capture="environment" 
+                    onChange={handleFileUpload}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
+                  <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-lg transition-colors"
+                  >
+                    <Upload className="w-6 h-6" />
+                    Importer une photo
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={takePhoto}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white py-5 rounded-2xl flex items-center justify-center gap-3 font-black text-lg shadow-xl"
+                >
+                  <Camera className="w-6 h-6" />
+                  Capturer la façade
+                </button>
+              )
             ) : (
               <div className="flex gap-4">
                 <button 
                   onClick={() => setPhotoData(null)}
-                  className="flex-1 bg-slate-800 text-white py-4 rounded-xl font-medium"
+                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-2xl font-bold transition-colors"
                 >
                   Reprendre
                 </button>
                 <button 
                   onClick={handleValidate}
-                  className="flex-1 bg-green-500 text-slate-950 py-4 rounded-xl font-bold flex items-center justify-center gap-2"
+                  className="flex-1 bg-green-500 hover:bg-green-400 text-slate-950 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-colors"
                 >
-                  <CheckCircle className="w-5 h-5" />
-                  Terminé !
+                  <CheckCircle className="w-6 h-6" />
+                  Valider !
                 </button>
               </div>
             )}
