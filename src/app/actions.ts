@@ -96,6 +96,7 @@ export async function validatePassage(passageId: string, status: Passage['status
 
   revalidatePath('/agent')
   revalidatePath('/admin')
+  revalidatePath('/dashboard')
   
   return { success: true }
 }
@@ -287,6 +288,7 @@ export async function approveAgent(agentId: string) {
   if (error) return { success: false, error: error.message }
   
   revalidatePath('/admin')
+  revalidatePath('/dashboard')
   return { success: true }
 }
 
@@ -386,6 +388,7 @@ export async function activateAbonnement(demandeId: string) {
     .eq('id', demandeId)
 
   revalidatePath('/admin')
+  revalidatePath('/dashboard')
   return { success: true }
 }
 
@@ -431,6 +434,7 @@ export async function updateProfile(formData: FormData) {
 
   revalidatePath('/dashboard')
   revalidatePath('/profil')
+  revalidatePath('/admin')
   return { success: true }
 }
 
@@ -487,6 +491,8 @@ export async function createTournee(formData: FormData) {
   if (passagesError) return { success: false, error: passagesError.message }
 
   revalidatePath('/admin')
+  revalidatePath('/agent')
+  revalidatePath('/dashboard')
   return { success: true, passagesCount: passages.length }
 }
 
@@ -510,21 +516,36 @@ export async function resolveSignalement(id: string) {
 
   if (error) return { success: false, error: error.message }
   revalidatePath('/admin')
+  revalidatePath('/dashboard')
   return { success: true }
 }
 
 export async function getAllUsers() {
   const supabase = await createClient()
   
-  const { data, error } = await supabase
+  // D'abord récupérer tous les profiles sans jointure complexe
+  const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
-    .select(`
-      *,
-      abonnements:abonnements(status, type_forfait)
-    `)
-    .order('created_at', { ascending: false })
+    .select('*')
+    .order('created_at', { ascending: false, nullsFirst: false })
 
-  return { success: !error, users: data || [] }
+  if (profilesError) {
+    console.error('[getAllUsers] Profiles Error:', profilesError)
+    return { success: false, users: [] }
+  }
+
+  // Ensuite récupérer les abonnements séparément pour éviter les problèmes de jointure
+  const { data: abonnements } = await supabase
+    .from('abonnements')
+    .select('*')
+
+  // Fusionner les données
+  const users = profiles.map((profile: any) => ({
+    ...profile,
+    abonnements: abonnements?.filter((ab: any) => ab.client_id === profile.id) || []
+  }))
+
+  return { success: true, users }
 }
 
 export async function getZonesStats() {
