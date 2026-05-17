@@ -1,6 +1,10 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { getAdminStats, getPendingAgents, getPendingAbonnements, getAllUsers, getZonesStats } from '../../actions'
-import { createClient } from '../../../lib/supabase/server'
-import { Activity, Users, DollarSign, Package, LayoutDashboard, Map, ClipboardCheck } from 'lucide-react'
+import { createClient } from '../../../lib/supabase/client'
+import { Activity, Users, DollarSign, Package, LayoutDashboard, Map, ClipboardCheck, RefreshCw } from 'lucide-react'
 import { PendingAgents } from '../../../components/admin/PendingAgents'
 import { PendingAbonnements } from '../../../components/admin/PendingAbonnements'
 import { CreateTournee } from '../../../components/admin/CreateTournee'
@@ -8,41 +12,64 @@ import { SignalementsList } from '../../../components/admin/SignalementsList'
 import { UsersTable } from '../../../components/admin/UsersTable'
 import { ZonesView } from '../../../components/admin/ZonesView'
 import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 
-export const revalidate = 0
-
-export default async function AdminPage(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const searchParams = await props.searchParams;
-  const currentTab = searchParams.tab || 'overview'
-
-  const supabase = await createClient()
+export default function AdminPage() {
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<any>(null)
+  const [recentPassages, setRecentPassages] = useState<any[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [zones, setZones] = useState<any[]>([])
+  const [pendingAgents, setPendingAgents] = useState<any[]>([])
+  const [pendingDemandes, setPendingDemandes] = useState<any[]>([])
+  const [refreshing, setRefreshing] = useState(false)
   
-  const stats = await getAdminStats()
-  const { data: recentPassages } = await supabase
-    .from('passages')
-    .select('*, profiles:client_id(repere_textuel, phone)')
-    .order('heure_passage', { ascending: false, nullsFirst: false })
-    .limit(10)
+  const searchParams = useSearchParams()
+  const currentTab = searchParams.get('tab') || 'overview'
 
-  let users: any[] = []
-  if (currentTab === 'users') {
-    const resUsers = await getAllUsers()
-    users = resUsers.users
+  const fetchData = async () => {
+    try {
+      const supabase = createClient()
+      
+      const [statsData, passagesData, usersData, zonesData, agentsData, demandesData] = await Promise.all([
+        getAdminStats(),
+        supabase.from('passages').select('*, profiles:client_id(repere_textuel, phone)').order('heure_passage', { ascending: false, nullsFirst: false }).limit(10),
+        currentTab === 'users' ? getAllUsers() : Promise.resolve({ success: true, users: [] }),
+        currentTab === 'zones' ? getZonesStats() : Promise.resolve({ success: true, zones: [] }),
+        (currentTab === 'validations' || currentTab === 'overview') ? getPendingAgents() : Promise.resolve({ success: true, agents: [] }),
+        (currentTab === 'validations' || currentTab === 'overview') ? getPendingAbonnements() : Promise.resolve({ success: true, demandes: [] })
+      ])
+
+      setStats(statsData)
+      setRecentPassages(passagesData.data || [])
+      if (usersData.success) setUsers(usersData.users)
+      if (zonesData.success) setZones(zonesData.zones)
+      if (agentsData.success) setPendingAgents(agentsData.agents)
+      if (demandesData.success) setPendingDemandes(demandesData.demandes)
+    } catch (e) {
+      console.error('[AdminPage] Error:', e)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }
 
-  let zones: any[] = []
-  if (currentTab === 'zones') {
-    const resZones = await getZonesStats()
-    zones = resZones.zones
-  }
+  useEffect(() => {
+    fetchData()
+  }, [currentTab])
 
-  let pendingAgents: any[] = []
-  let pendingDemandes: any[] = []
-  if (currentTab === 'validations' || currentTab === 'overview') {
-     const resAgents = await getPendingAgents()
-     pendingAgents = resAgents.agents
-     const resDemandes = await getPendingAbonnements()
-     pendingDemandes = resDemandes.demandes
+  // Rafraîchir automatiquement toutes les 30 secondes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshing(true)
+      fetchData()
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [currentTab])
+
+  const handleRefresh = () => {
+    setRefreshing(true)
+    fetchData()
   }
 
   const tabs = [
@@ -52,11 +79,29 @@ export default async function AdminPage(props: { searchParams: Promise<{ [key: s
     { id: 'validations', name: 'Validations', icon: ClipboardCheck },
   ]
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-green-600" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 p-6 font-sans">
-      <header className="mb-8">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tableau de Bord Admin</h1>
-        <p className="text-slate-500 font-medium mt-1">Supervision globale LEPOINCITOYEN</p>
+      <header className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tableau de Bord Admin</h1>
+          <p className="text-slate-500 font-medium mt-1">Supervision globale LEPOINCITOYEN</p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="p-3 bg-white text-slate-600 hover:text-green-600 rounded-xl border border-slate-200 transition-all hover:border-green-200 disabled:opacity-50"
+          title="Rafraîchir"
+        >
+          {refreshing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+        </button>
       </header>
 
       {/* Tabs Navigation */}

@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import DashboardContent from './DashboardContent'
 import { Loader2 } from 'lucide-react'
 
+export const revalidate = 0
+
 export default function DashboardPage() {
   return (
     <Suspense fallback={

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { createDemandeAbonnement } from '../../actions'
+import { createClient } from '../../../lib/supabase/client'
 import Image from 'next/image'
 import {
   CheckCircle2,
@@ -85,13 +86,39 @@ const OPERATEURS = [
 ]
 
 export default function SubscribePage() {
-  const [step, setStep] = useState<'forfait' | 'paiement' | 'confirmation'>('forfait')
+  const [step, setStep] = useState<'forfait' | 'paiement' | 'confirmation' | 'profile'>('forfait')
   const [selectedForfait, setSelectedForfait] = useState<typeof FORFAITS[0] | null>(null)
   const [selectedOperateur, setSelectedOperateur] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [loadingProfile, setLoadingProfile] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    const checkProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        setUserProfile(profile)
+      }
+      setLoadingProfile(false)
+    }
+    checkProfile()
+  }, [])
 
   const handleSelectForfait = (forfait: typeof FORFAITS[0]) => {
+    // Vérifier si le profil est complet avant de continuer
+    const isProfileComplete = userProfile?.phone && userProfile?.repere_textuel
+    if (!isProfileComplete) {
+      setStep('profile')
+      setSelectedForfait(forfait)
+      return
+    }
     setSelectedForfait(forfait)
     setStep('paiement')
   }
@@ -106,6 +133,33 @@ export default function SubscribePage() {
         setError(result.error ?? 'Erreur inconnue')
       }
     })
+  }
+
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const phone = formData.get('phone') as string
+    const repere_textuel = formData.get('repere_textuel') as string
+    const lat = formData.get('lat') as string
+    const lng = formData.get('lng') as string
+
+    const supabase = createClient()
+    const updates: Record<string, unknown> = { phone, repere_textuel }
+    if (lat && lng) {
+      updates.coords_gps = { lat: parseFloat(lat), lng: parseFloat(lng) }
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userProfile?.id)
+
+    if (!error) {
+      setUserProfile({ ...userProfile, phone, repere_textuel })
+      setStep('paiement')
+    } else {
+      setError('Erreur lors de la mise à jour du profil.')
+    }
   }
 
   return (

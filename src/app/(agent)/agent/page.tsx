@@ -18,6 +18,8 @@ export default function AgentPage() {
   const [reporting, setReporting] = useState(false)
   const [reportSuccess, setReportSuccess] = useState(false)
   const [cameraError, setCameraError] = useState(false)
+  const [showProfileModal, setShowProfileModal] = useState(false)
+  const [agentProfile, setAgentProfile] = useState<any>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -31,13 +33,30 @@ export default function AgentPage() {
     const supabase = createClient()
     const getAgent = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) setAgentId(user.id)
+      if (user) {
+        setAgentId(user.id)
+        // Vérifier si le profil est complet
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+        setAgentProfile(profile)
+      }
     }
     getAgent()
   }, [])
 
   const handleDownloadTournee = async () => {
     if (!agentId) return
+    
+    // Vérifier si le profil est complet
+    const isProfileComplete = agentProfile?.phone && agentProfile?.repere_textuel
+    if (!isProfileComplete) {
+      setShowProfileModal(true)
+      return
+    }
+    
     setLoading(true)
     try {
       const res = await getAgentTournee(agentId)
@@ -285,6 +304,79 @@ export default function AgentPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de complétion de profil */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full space-y-6">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Complétez votre profil</h2>
+              <p className="text-slate-500 font-medium mt-2">Veuillez renseigner vos informations pour apparaître dans le système.</p>
+            </div>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              const phone = formData.get('phone') as string
+              const repere_textuel = formData.get('repere_textuel') as string
+              
+              const supabase = createClient()
+              const { error } = await supabase
+                .from('profiles')
+                .update({ phone, repere_textuel })
+                .eq('id', agentId)
+              
+              if (!error) {
+                setAgentProfile({ ...agentProfile, phone, repere_textuel })
+                setShowProfileModal(false)
+                alert('Profil mis à jour avec succès!')
+              } else {
+                alert('Erreur lors de la mise à jour du profil.')
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Numéro de téléphone</label>
+                <input 
+                  type="tel" 
+                  name="phone"
+                  defaultValue={agentProfile?.phone || ''}
+                  required
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                  placeholder="+237 6XX XXX XXX"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Adresse / Repère textuel</label>
+                <textarea 
+                  name="repere_textuel"
+                  defaultValue={agentProfile?.repere_textuel || ''}
+                  required
+                  rows={3}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 resize-none"
+                  placeholder="Ex: Quartier, près du marché, maison bleue..."
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => setShowProfileModal(false)}
+                  className="flex-1 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal/Drawer pour la validation */}
       {activeMission && (

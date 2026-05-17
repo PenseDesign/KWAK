@@ -53,6 +53,10 @@ export default function DashboardContent() {
       }
     }
     fetchStatus()
+
+    // Rafraîchir automatiquement toutes les 30 secondes
+    const interval = setInterval(fetchStatus, 30000)
+    return () => clearInterval(interval)
   }, [user])
 
   const handleReport = async () => {
