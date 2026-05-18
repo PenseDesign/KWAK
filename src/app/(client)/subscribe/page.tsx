@@ -14,25 +14,30 @@ import {
   Star,
   Calendar,
   ShieldCheck,
+  Home,
+  Phone,
+  MapPin,
+  Navigation,
+  Info,
 } from 'lucide-react'
 
 const FORFAITS = [
   {
     id: 'Mensuel Basique',
     label: 'Mensuel Basique',
-    price: 2000,
+    price: 2500,
     period: 'mois',
-    passages: '2 passages / semaine',
-    bagsPerPassage: 2,
+    passages: '1 passages / semaine',
+    bagsPerPassage: 1,
     color: 'from-slate-800 to-slate-900',
     accent: 'text-green-400',
     accentBg: 'bg-green-400/10',
     badge: null,
     icon: <Calendar className="w-7 h-7" />,
-    highlight: '8 passages / mois',
+    highlight: '04 passages / mois',
     features: [
-      '2 sacs poubelles / passage',
-      '2 ramassages par semaine',
+      '1 sac poubelle / passage',
+      '1 ramassage par semaine',
       'Suivi en temps réel',
       'Support client',
     ],
@@ -40,10 +45,10 @@ const FORFAITS = [
   {
     id: 'Mensuel Pro',
     label: 'Mensuel Pro',
-    price: 2500,
+    price: 3000,
     period: 'mois',
-    passages: '3 passages / semaine',
-    bagsPerPassage: 3,
+    passages: '2 passages / semaine',
+    bagsPerPassage: 2,
     color: 'from-green-700 to-green-900',
     accent: 'text-yellow-300',
     accentBg: 'bg-yellow-300/10',
@@ -51,8 +56,8 @@ const FORFAITS = [
     icon: <Star className="w-7 h-7" />,
     highlight: '12 passages / mois',
     features: [
-      '3 sacs poubelles / passage',
-      '3 ramassages par semaine',
+      '01 sacs poubelles / passage',
+      '02 ramassages par semaine',
       'Suivi en temps réel',
       'Support prioritaire',
       'Rapport mensuel',
@@ -93,6 +98,32 @@ export default function SubscribePage() {
   const [isPending, startTransition] = useTransition()
   const [userProfile, setUserProfile] = useState<any>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [gpsCoords, setGpsCoords] = useState<{ lat: number, lng: number } | null>(null)
+
+  const handleGetGpsInSubscribe = () => {
+    setGpsLoading(true)
+    setError(null)
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setGpsCoords({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          })
+          setGpsLoading(false)
+        },
+        (err) => {
+          setError("Impossible de récupérer la position GPS. Vérifiez les permissions.")
+          setGpsLoading(false)
+        },
+        { enableHighAccuracy: true }
+      )
+    } else {
+      setError("La géolocalisation n'est pas supportée par votre navigateur.")
+      setGpsLoading(false)
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -168,7 +199,7 @@ export default function SubscribePage() {
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
+            <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
             <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN — Abonnement</span>
           </div>
           {step === 'paiement' && (
@@ -187,21 +218,34 @@ export default function SubscribePage() {
 
         {/* Step indicator */}
         <div className="flex items-center gap-3 mb-10 justify-center">
-          {['forfait', 'paiement'].map((s, i) => (
-            <div key={s} className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm transition-all
-                ${step === s || (step === 'confirmation' && i < 2)
-                  ? 'bg-green-600 text-white shadow-lg shadow-green-200'
-                  : 'bg-slate-100 text-slate-400'
-                }`}>
-                {i + 1}
-              </div>
-              <span className={`text-sm font-bold hidden sm:block ${step === s ? 'text-slate-900' : 'text-slate-400'}`}>
-                {s === 'forfait' ? 'Choisir un forfait' : 'Paiement'}
-              </span>
-              {i < 1 && <div className="w-8 h-px bg-slate-200" />}
-            </div>
-          ))}
+          {(() => {
+            const stepsList = ['forfait']
+            const needsProfile = !userProfile?.phone || !userProfile?.repere_textuel
+            if (needsProfile || step === 'profile') {
+              stepsList.push('profile')
+            }
+            stepsList.push('paiement')
+
+            return stepsList.map((s, i) => {
+              const isActive = step === s
+              const isCompleted = stepsList.indexOf(step) > i
+              return (
+                <div key={s} className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm transition-all
+                    ${isActive || isCompleted
+                      ? 'bg-green-600 text-white shadow-lg shadow-green-200'
+                      : 'bg-slate-100 text-slate-400'
+                    }`}>
+                    {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : i + 1}
+                  </div>
+                  <span className={`text-sm font-bold hidden sm:block ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
+                    {s === 'forfait' ? 'Choisir un forfait' : s === 'profile' ? 'Mon Profil' : 'Paiement'}
+                  </span>
+                  {i < stepsList.length - 1 && <div className="w-8 h-px bg-slate-200" />}
+                </div>
+              )
+            })
+          })()}
         </div>
 
         {/* STEP 1 — Choose plan */}
@@ -318,11 +362,10 @@ export default function SubscribePage() {
 
             {/* Payment instructions */}
             {selectedOperateur && (
-              <div className={`rounded-[2rem] p-7 space-y-4 ${
-                selectedOperateur === 'mtn'
-                  ? 'bg-yellow-50 border border-yellow-200'
-                  : 'bg-orange-50 border border-orange-200'
-              }`}>
+              <div className={`rounded-[2rem] p-7 space-y-4 ${selectedOperateur === 'mtn'
+                ? 'bg-yellow-50 border border-yellow-200'
+                : 'bg-orange-50 border border-orange-200'
+                }`}>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className={`w-5 h-5 ${selectedOperateur === 'mtn' ? 'text-yellow-700' : 'text-orange-700'}`} />
                   <h3 className={`font-black text-lg ${selectedOperateur === 'mtn' ? 'text-yellow-900' : 'text-orange-900'}`}>
@@ -332,9 +375,8 @@ export default function SubscribePage() {
                 <div className={`space-y-2 text-sm font-medium ${selectedOperateur === 'mtn' ? 'text-yellow-800' : 'text-orange-800'}`}>
                   <p>1. Ouvrez votre app <strong>{selectedOperateur === 'mtn' ? 'MTN MoMo' : 'Orange Money'}</strong></p>
                   <p>2. Envoyez <strong>{selectedForfait.price.toLocaleString()} FCFA</strong> au numéro :</p>
-                  <div className={`text-2xl font-black tracking-wider py-3 px-5 rounded-2xl ${
-                    selectedOperateur === 'mtn' ? 'bg-yellow-200 text-yellow-900' : 'bg-orange-200 text-orange-900'
-                  }`}>
+                  <div className={`text-2xl font-black tracking-wider py-3 px-5 rounded-2xl ${selectedOperateur === 'mtn' ? 'bg-yellow-200 text-yellow-900' : 'bg-orange-200 text-orange-900'
+                    }`}>
                     {OPERATEURS.find(o => o.id === selectedOperateur)?.number}
                   </div>
                   <p>3. Dans le motif, indiquez : <strong>LPC - {selectedForfait.label}</strong></p>
@@ -375,6 +417,130 @@ export default function SubscribePage() {
             <p className="text-center text-xs text-slate-400 font-medium px-4">
               Votre abonnement sera activé dans les <strong>24h</strong> après vérification par notre équipe.
             </p>
+          </form>
+        )}
+
+        {/* STEP — Complete profile */}
+        {step === 'profile' && selectedForfait && (
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="text-center mb-8 space-y-2">
+              <h1 className="text-4xl font-black text-slate-900">Complétez votre profil</h1>
+              <p className="text-slate-500 font-medium">
+                Pour finaliser votre abonnement <span className="font-black text-slate-900">{selectedForfait.label}</span>, nous avons besoin de vos coordonnées de collecte.
+              </p>
+            </div>
+
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                {error}
+              </div>
+            )}
+
+            {/* Section: Coordonnées obligatoires */}
+            <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 space-y-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Home className="w-5 h-5 text-green-600" />
+                <h3 className="font-black text-slate-900 text-lg">Adresse de Collecte</h3>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                    Adresse / Quartier / Repères (Obligatoire)
+                  </label>
+                  <input
+                    name="repere_textuel"
+                    type="text"
+                    required
+                    defaultValue={userProfile?.repere_textuel || ''}
+                    placeholder="Ex : Akwa, face Boulangerie Z, Portail Vert"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                    Téléphone de contact (Obligatoire)
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 pointer-events-none" />
+                    <input
+                      name="phone"
+                      type="tel"
+                      required
+                      defaultValue={userProfile?.phone || ''}
+                      placeholder="Ex: 6XX XX XX XX"
+                      className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Section: GPS (Optionnel) */}
+            <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-500" />
+                  <h3 className="font-black text-slate-900 text-lg">Position GPS</h3>
+                  <span className="text-[10px] font-black bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase">Recommandé</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-500 font-medium leading-relaxed">
+                Le GPS permet à notre agent de localiser précisément votre domicile sur sa carte de collecte.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <button
+                  type="button"
+                  onClick={handleGetGpsInSubscribe}
+                  disabled={gpsLoading}
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-50 text-blue-600 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors disabled:opacity-50"
+                >
+                  {gpsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                  {gpsCoords ? "Mettre à jour ma position" : "Capturer ma position GPS"}
+                </button>
+
+                {gpsCoords && (
+                  <div className="text-xs font-bold text-green-600 flex items-center gap-1 bg-green-50 px-3 py-2 rounded-lg">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Position capturée : {gpsCoords.lat.toFixed(4)}, {gpsCoords.lng.toFixed(4)}
+                  </div>
+                )}
+              </div>
+
+              {/* Hidden inputs to send GPS coordinates */}
+              <input type="hidden" name="lat" value={gpsCoords?.lat || ''} />
+              <input type="hidden" name="lng" value={gpsCoords?.lng || ''} />
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                type="button"
+                onClick={() => setStep('forfait')}
+                className="w-full sm:w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 py-5 rounded-2xl font-black text-lg transition-all active:scale-[0.98]"
+              >
+                Retour
+              </button>
+
+              <button
+                type="submit"
+                className="w-full sm:w-2/3 bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-slate-200"
+              >
+                Continuer vers le paiement
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+              <Info className="w-5 h-5 text-amber-600 shrink-0" />
+              <p className="text-xs text-amber-700 font-medium">
+                Ces informations sont indispensables pour organiser le passage de nos camions chez vous.
+              </p>
+            </div>
           </form>
         )}
       </div>

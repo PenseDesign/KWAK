@@ -182,7 +182,7 @@ export default function DashboardContent() {
           )}
 
           {/* Profile Incomplete Alert */}
-          {!statusData?.profile?.repere_textuel && (
+          {(!statusData?.profile?.repere_textuel || !statusData?.profile?.phone) && (
             <div className="bg-amber-50 border border-amber-200 rounded-[2rem] p-7 flex items-start gap-4">
               <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shrink-0">
                 <Info className="w-6 h-6" />
@@ -191,7 +191,7 @@ export default function DashboardContent() {
                 <div>
                   <p className="font-black text-amber-900 text-lg">Profil incomplet</p>
                   <p className="text-amber-700 text-sm font-medium">
-                    Veuillez renseigner votre <strong>adresse exacte</strong> pour que l'agent puisse vous trouver.
+                    Veuillez renseigner votre <strong>adresse exacte</strong> et votre <strong>téléphone de contact</strong> pour que l'agent puisse vous trouver.
                   </p>
                 </div>
                 <a

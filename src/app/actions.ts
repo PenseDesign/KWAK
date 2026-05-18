@@ -312,6 +312,17 @@ export async function createDemandeAbonnement(formData: FormData) {
   const operateur = formData.get('operateur') as string
   const phonePayment = formData.get('phone_payment') as string
 
+  // Vérifier si le profil est complet avant de créer l'abonnement
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('phone, repere_textuel')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !profile.phone || !profile.repere_textuel) {
+    return { success: false, error: 'Votre profil doit être complet (téléphone et adresse de collecte) avant de souscrire.' }
+  }
+
   // Check if already has a pending or active demand
   const { data: existing } = await supabase
     .from('demandes_abonnement')
@@ -523,15 +534,24 @@ export async function resolveSignalement(id: string) {
 export async function getAllUsers() {
   const supabase = await createClient()
   
-  // D'abord récupérer tous les profiles sans jointure complexe
-  const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false, nullsFirst: false })
-
-  if (profilesError) {
-    console.error('[getAllUsers] Profiles Error:', profilesError)
-    return { success: false, users: [] }
+  // D'abord tenter de récupérer avec l'adresse e-mail via l'RPC get_users_admin
+  const { data: profiles, error: rpcError } = await supabase.rpc('get_users_admin')
+  
+  let finalProfiles = profiles
+  
+  if (rpcError || !profiles) {
+    console.warn('[getAllUsers] RPC error, falling back to basic profiles list:', rpcError?.message)
+    // Solution de repli (fallback)
+    const { data: fallbackProfiles, error: fallbackError } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false, nullsFirst: false })
+      
+    if (fallbackError) {
+      console.error('[getAllUsers] Fallback Error:', fallbackError)
+      return { success: false, users: [] }
+    }
+    finalProfiles = fallbackProfiles
   }
 
   // Ensuite récupérer les abonnements séparément pour éviter les problèmes de jointure
@@ -540,12 +560,130 @@ export async function getAllUsers() {
     .select('*')
 
   // Fusionner les données
-  const users = profiles.map((profile: any) => ({
+  const users = finalProfiles.map((profile: any) => ({
     ...profile,
     abonnements: abonnements?.filter((ab: any) => ab.client_id === profile.id) || []
   }))
 
   return { success: true, users }
+}
+
+export async function adminCreateUser(formData: FormData) {
+  const supabase = await createClient()
+  
+  // Vérifier si l'utilisateur est admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+    
+  if (!profile || profile.role !== 'admin') {
+    return { success: false, error: 'Seuls les administrateurs peuvent créer des utilisateurs.' }
+  }
+
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
+  const phone = formData.get('phone') as string
+  const role = formData.get('role') as string
+  const repere_textuel = formData.get('repere_textuel') as string
+
+  if (!email || !password || !role) {
+    return { success: false, error: 'L\'e-mail, le mot de passe et le rôle sont obligatoires.' }
+  }
+
+  const { data: newUserId, error } = await supabase.rpc('create_user_by_admin', {
+    user_email: email,
+    user_password: password,
+    user_phone: phone || null,
+    user_role: role,
+    user_repere_textuel: repere_textuel || null
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true, userId: newUserId }
+}
+
+export async function adminUpdateUser(userId: string, formData: FormData) {
+  const supabase = await createClient()
+  
+  // Vérifier si l'utilisateur est admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+    
+  if (!profile || profile.role !== 'admin') {
+    return { success: false, error: 'Seuls les administrateurs peuvent modifier des utilisateurs.' }
+  }
+
+  const phone = formData.get('phone') as string
+  const role = formData.get('role') as string
+  const repere_textuel = formData.get('repere_textuel') as string
+
+  if (!role) {
+    return { success: false, error: 'Le rôle est obligatoire.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      phone: phone || null,
+      role: role,
+      repere_textuel: repere_textuel || null
+    })
+    .eq('id', userId)
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+export async function adminDeleteUser(targetUserId: string) {
+  const supabase = await createClient()
+  
+  // Vérifier si l'utilisateur est admin
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+    
+  if (!profile || profile.role !== 'admin') {
+    return { success: false, error: 'Seuls les administrateurs peuvent supprimer des utilisateurs.' }
+  }
+
+  if (user.id === targetUserId) {
+    return { success: false, error: 'Vous ne pouvez pas supprimer votre propre compte admin.' }
+  }
+
+  const { error } = await supabase.rpc('delete_user_by_admin', {
+    user_id: targetUserId
+  })
+
+  if (error) {
+    return { success: false, error: error.message }
+  }
+
+  revalidatePath('/admin')
+  return { success: true }
 }
 
 export async function getZonesStats() {
