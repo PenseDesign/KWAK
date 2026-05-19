@@ -41,7 +41,13 @@ export async function proxy(request: NextRequest) {
         pathname.startsWith('/login') ||
         pathname.startsWith('/register') ||
         pathname.startsWith('/subscribe') ||
-        pathname === '/favicon.ico'
+        pathname === '/favicon.ico' ||
+        pathname.startsWith('/manifest') ||
+        pathname === '/sw.js' ||
+        pathname === '/icon-192.png' ||
+        pathname === '/icon-512.png' ||
+        pathname === '/logo.jpeg' ||
+        pathname === '/logo.png'
 
     // Si non connecté et pas public → login
     if (!user && !isPublicPath) {
@@ -97,6 +103,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|manifest.*|sw\\.js|icon-.*\\.png|logo\\..*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
