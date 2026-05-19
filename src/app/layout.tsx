@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,18 @@ export const metadata: Metadata = {
   title: "LEPOINCITOYEN — Précollecte et Valorisation Responsable",
   description: "Plateforme intelligente de précollecte des déchets. Connecte les ménages aux agents de collecte pour une ville plus propre.",
   icons: {
-    icon: "/logo.png",
+    icon: "/logo.jpeg",
+    apple: "/icon-512.png",
   },
 };
+
+export const viewport: Viewport = {
+  themeColor: "#16a34a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 
 export default function RootLayout({
   children,
@@ -30,7 +40,10 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }
