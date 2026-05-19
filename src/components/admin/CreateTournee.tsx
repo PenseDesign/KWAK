@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { getAgents, createTournee } from '../../app/actions'
-import { 
-  Calendar, 
-  User, 
-  Truck, 
-  Loader2, 
-  CheckCircle2, 
+import {
+  Calendar,
+  User,
+  Truck,
+  Loader2,
+  CheckCircle2,
   AlertCircle
 } from 'lucide-react'
 
@@ -16,7 +16,7 @@ export function CreateTournee() {
   const [loadingAgents, setLoadingAgents] = useState(true)
   const [isPending, startTransition] = useTransition()
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
-  
+
   const [selectedAgent, setSelectedAgent] = useState('')
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
 
@@ -34,13 +34,13 @@ export function CreateTournee() {
     setMessage(null)
 
     const formData = new FormData(e.currentTarget)
-    
+
     startTransition(async () => {
       const res = await createTournee(formData)
       if (res.success) {
-        setMessage({ 
-          type: 'success', 
-          text: `Tournée créée avec succès ! ${res.passagesCount} clients programmés pour ce jour.` 
+        setMessage({
+          type: 'success',
+          text: `Tournée créée avec succès ! ${res.passagesCount} clients programmés pour ce jour.`
         })
         setSelectedAgent('')
       } else {
@@ -67,7 +67,7 @@ export function CreateTournee() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid sm:grid-cols-2 gap-6">
-          
+
           <div className="space-y-2">
             <label className="block text-xs font-black uppercase tracking-widest text-slate-400 ml-1">
               Assigner un Agent
@@ -114,16 +114,15 @@ export function CreateTournee() {
           <div className="space-y-1">
             <p className="text-sm font-bold text-blue-700">Logique Automatique</p>
             <p className="text-xs text-blue-600/80 font-medium leading-relaxed">
-              En créant une tournée pour le <strong>{getDayName(selectedDate)}</strong>, le système ajoutera 
+              En créant une tournée pour le <strong>{getDayName(selectedDate)}</strong>, le système ajoutera
               automatiquement les clients dont l'abonnement prévoit un passage ce jour-là.
             </p>
           </div>
         </div>
 
         {message && (
-          <div className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-bold border ${
-            message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
-          }`}>
+          <div className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-bold border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+            }`}>
             {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
             {message.text}
           </div>

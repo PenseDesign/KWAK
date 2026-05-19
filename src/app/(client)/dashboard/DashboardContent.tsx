@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getClientStatus, reportIssue, signOut } from '../../actions'
-import { 
-  AlertTriangle, 
-  Calendar, 
-  CheckCircle2, 
-  Loader2, 
-  PackageX, 
-  LogOut, 
-  History, 
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle2,
+  Loader2,
+  PackageX,
+  LogOut,
+  History,
   ArrowRight,
   ShieldCheck,
   CreditCard,
@@ -82,23 +82,23 @@ export default function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-12">
-      
+
       {/* Top Header */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-             <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
-             <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
+            <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
+            <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
           </div>
           <div className="flex items-center gap-2">
-            <a 
+            <a
               href="/profil"
               className="p-2.5 bg-slate-50 text-slate-500 hover:text-green-600 rounded-xl transition-all hover:bg-green-50"
               title="Mon Profil"
             >
               <User className="w-5 h-5" />
             </a>
-            <button 
+            <button
               onClick={() => signOut()}
               className="p-2.5 bg-slate-50 text-slate-400 hover:text-red-500 rounded-xl transition-all hover:bg-red-50"
             >
@@ -109,14 +109,14 @@ export default function DashboardContent() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 mt-8 grid lg:grid-cols-3 gap-8">
-        
+
         {/* Left Column: Status & Actions */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Welcome Card */}
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 overflow-hidden relative group">
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-500">
-               <ShieldCheck className="w-48 h-48 text-green-600" />
+              <ShieldCheck className="w-48 h-48 text-green-600" />
             </div>
             <div className="relative z-10 space-y-6">
               <div className="space-y-1">
@@ -125,9 +125,8 @@ export default function DashboardContent() {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
-                  abonnement?.status === 'actif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${abonnement?.status === 'actif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
                   <div className={`w-2 h-2 rounded-full ${abonnement?.status === 'actif' ? 'bg-green-600 animate-pulse' : 'bg-red-600'}`} />
                   Forfait {abonnement?.status === 'actif' ? 'Actif' : 'Inactif'}
                 </div>
@@ -207,25 +206,25 @@ export default function DashboardContent() {
 
           {/* Next Passage Large Card */}
           <div className="bg-slate-900 rounded-[2.5rem] p-8 shadow-2xl shadow-slate-200 text-white relative overflow-hidden">
-             <div className="absolute -right-10 -bottom-10 opacity-10">
-                <Calendar className="w-64 h-64" />
-             </div>
-             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-                <div className="space-y-2">
-                   <p className="text-green-400 font-bold tracking-widest uppercase text-xs">Prochain Passage Prévu</p>
-                   <h2 className="text-4xl font-black">
-                     {nextDate ? new Date(nextDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Date à définir'}
-                   </h2>
-                   <p className="text-slate-400 text-sm font-medium">
-                     Préparez vos bacs la veille au soir.
-                   </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col items-center">
-                   <Clock className="w-8 h-8 text-green-400 mb-2" />
-                   <span className="text-xs font-bold text-slate-300">Heure estimée</span>
-                   <span className="text-xl font-black">07:30 - 09:00</span>
-                </div>
-             </div>
+            <div className="absolute -right-10 -bottom-10 opacity-10">
+              <Calendar className="w-64 h-64" />
+            </div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+              <div className="space-y-2">
+                <p className="text-green-400 font-bold tracking-widest uppercase text-xs">Prochain Passage Prévu</p>
+                <h2 className="text-4xl font-black">
+                  {nextDate ? new Date(nextDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : 'Date à définir'}
+                </h2>
+                <p className="text-slate-400 text-sm font-medium">
+                  Préparez vos bacs la veille au soir.
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col items-center">
+                <Clock className="w-8 h-8 text-green-400 mb-2" />
+                <span className="text-xs font-bold text-slate-300">Heure estimée</span>
+                <span className="text-xl font-black">07:30 - 09:00</span>
+              </div>
+            </div>
           </div>
 
           {/* Historique */}
@@ -257,7 +256,7 @@ export default function DashboardContent() {
                 </div>
               )) : (
                 <div className="p-12 text-center text-slate-400 font-medium">
-                   Aucun historique pour le moment.
+                  Aucun historique pour le moment.
                 </div>
               )}
             </div>
@@ -267,40 +266,40 @@ export default function DashboardContent() {
 
         {/* Right Column: Mini Info Cards */}
         <div className="space-y-6">
-          
+
           {/* Signalement Card */}
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 space-y-6">
-             <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
-                <AlertTriangle className="w-7 h-7" />
-             </div>
-             <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900">Un problème ?</h3>
-                <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                  Si le camion n'est pas passé ou si vous avez une réclamation, signalez-le ici.
-                </p>
-             </div>
-             <button 
-                onClick={handleReport}
-                disabled={reporting || reportSuccess}
-                className="w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50
+            <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-slate-900">Un problème ?</h3>
+              <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                Si le camion n'est pas passé ou si vous avez une réclamation, signalez-le ici.
+              </p>
+            </div>
+            <button
+              onClick={handleReport}
+              disabled={reporting || reportSuccess}
+              className="w-full py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50
                 bg-slate-900 text-white hover:bg-black shadow-lg shadow-slate-200"
-             >
-                {reporting ? <Loader2 className="w-5 h-5 animate-spin" /> : reportSuccess ? "Signalé !" : "Signaler un oubli"}
-             </button>
+            >
+              {reporting ? <Loader2 className="w-5 h-5 animate-spin" /> : reportSuccess ? "Signalé !" : "Signaler un oubli"}
+            </button>
           </div>
 
           {/* Support Card */}
           <div className="bg-green-600 rounded-[2.5rem] p-8 text-white space-y-6 shadow-xl shadow-green-100">
-             <div className="space-y-2">
-                <h3 className="text-xl font-black leading-tight">Besoin de nous contacter ?</h3>
-                <p className="text-green-100 text-sm font-medium opacity-80">
-                  Notre support client est disponible pour vous aider avec votre abonnement.
-                </p>
-             </div>
-             <a href="tel:+237600000000" className="w-full bg-white text-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
-                <Phone className="w-5 h-5" />
-                Contacter le support
-             </a>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black leading-tight">Besoin de nous contacter ?</h3>
+              <p className="text-green-100 text-sm font-medium opacity-80">
+                Notre support client est disponible pour vous aider avec votre abonnement.
+              </p>
+            </div>
+            <a href="tel:+237600000000" className="w-full bg-white text-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
+              <Phone className="w-5 h-5" />
+              Contacter le support
+            </a>
           </div>
 
         </div>
@@ -312,16 +311,16 @@ export default function DashboardContent() {
 
 function Clock({ className, ...props }: any) {
   return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
       {...props}
     >

@@ -13,7 +13,7 @@ export default function AgentPage() {
   const [loading, setLoading] = useState(false)
   const [activeMission, setActiveMission] = useState<ClientMission | null>(null)
   const [photoData, setPhotoData] = useState<string | null>(null)
-  
+
   // Nouveaux états
   const [reporting, setReporting] = useState(false)
   const [reportSuccess, setReportSuccess] = useState(false)
@@ -49,14 +49,14 @@ export default function AgentPage() {
 
   const handleDownloadTournee = async () => {
     if (!agentId) return
-    
+
     // Vérifier si le profil est complet
     const isProfileComplete = agentProfile?.phone && agentProfile?.repere_textuel
     if (!isProfileComplete) {
       setShowProfileModal(true)
       return
     }
-    
+
     setLoading(true)
     try {
       const res = await getAgentTournee(agentId)
@@ -130,9 +130,9 @@ export default function AgentPage() {
 
   const handleValidate = async () => {
     if (!activeMission) return
-    
+
     await queuePassageValidation(activeMission.passage_id, 'valide', photoData || undefined)
-    
+
     // Reset state
     setActiveMission(null)
     setPhotoData(null)
@@ -143,11 +143,11 @@ export default function AgentPage() {
     if (!agentId) return
     const reason = prompt("Décrivez le problème (ex: Tricycle en panne, Route bloquée) :")
     if (!reason) return
-    
+
     setReporting(true)
     const res = await reportIssue(agentId, reason)
     setReporting(false)
-    
+
     if (res.success) {
       setReportSuccess(true)
       setTimeout(() => setReportSuccess(false), 3000)
@@ -174,7 +174,7 @@ export default function AgentPage() {
               <h1 className="text-2xl font-black text-white">Mode Mission</h1>
               <p className="text-green-400 font-medium capitalize">{today}</p>
             </div>
-            <button 
+            <button
               onClick={() => signOut()}
               className="p-3 bg-slate-900 text-slate-400 hover:text-white rounded-2xl border border-slate-800 transition-colors shadow-lg"
               title="Déconnexion"
@@ -182,7 +182,7 @@ export default function AgentPage() {
               <LogOut className="w-5 h-5" />
             </button>
           </div>
-          
+
           {offlineQueueCount > 0 && (
             <div className="self-start flex items-center gap-2 bg-amber-900/50 text-amber-500 px-4 py-2 rounded-full text-sm font-bold border border-amber-800">
               {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
@@ -201,7 +201,7 @@ export default function AgentPage() {
                 <h2 className="text-xl font-black text-white">Aucune tournée chargée</h2>
                 <p className="text-slate-400 mt-2 font-medium">Vous n'avez pas encore téléchargé votre itinéraire du jour.</p>
               </div>
-              <button 
+              <button
                 onClick={handleDownloadTournee}
                 disabled={loading}
                 className="w-full bg-green-500 hover:bg-green-400 text-slate-950 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50"
@@ -217,7 +217,7 @@ export default function AgentPage() {
                 <h3 className="font-bold">Un empêchement ?</h3>
               </div>
               <p className="text-sm text-red-200/70">Signalez un problème (panne, accident) à votre superviseur.</p>
-              <button 
+              <button
                 onClick={handleReport}
                 disabled={reporting || reportSuccess}
                 className="w-full py-3 bg-red-900/50 text-red-400 hover:bg-red-900/80 rounded-xl font-bold transition-all disabled:opacity-50"
@@ -238,7 +238,7 @@ export default function AgentPage() {
                 <div className="text-green-400 font-black text-xl">{progressPercentage}%</div>
               </div>
               <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-green-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                   style={{ width: `${progressPercentage}%` }}
                 >
@@ -250,32 +250,30 @@ export default function AgentPage() {
             <div className="space-y-4">
               {cachedTournee.map((mission, index) => {
                 const isCompleted = mission.passage_status === 'valide'
-                const gpsUrl = mission.coords_gps 
+                const gpsUrl = mission.coords_gps
                   ? `https://www.google.com/maps/dir/?api=1&destination=${(mission.coords_gps as any).lat},${(mission.coords_gps as any).lng}`
                   : null
 
                 return (
-                  <div 
+                  <div
                     key={mission.passage_id}
                     onClick={() => !isCompleted && setActiveMission(mission)}
-                    className={`p-5 rounded-[2rem] border transition-all ${
-                      isCompleted 
-                        ? 'bg-slate-900/40 border-slate-800/50 opacity-60' 
-                        : 'bg-slate-900 border-slate-700 hover:border-green-500/50 cursor-pointer shadow-xl'
-                    }`}
+                    className={`p-5 rounded-[2rem] border transition-all ${isCompleted
+                      ? 'bg-slate-900/40 border-slate-800/50 opacity-60'
+                      : 'bg-slate-900 border-slate-700 hover:border-green-500/50 cursor-pointer shadow-xl'
+                      }`}
                   >
                     <div className="flex gap-4">
-                      <div className={`w-12 h-12 shrink-0 flex flex-col items-center justify-center rounded-2xl font-black text-xl ${
-                        isCompleted ? 'bg-green-900/30 text-green-500' : 'bg-green-500 text-slate-950 shadow-inner shadow-white/20'
-                      }`}>
+                      <div className={`w-12 h-12 shrink-0 flex flex-col items-center justify-center rounded-2xl font-black text-xl ${isCompleted ? 'bg-green-900/30 text-green-500' : 'bg-green-500 text-slate-950 shadow-inner shadow-white/20'
+                        }`}>
                         {isCompleted ? <CheckCircle className="w-6 h-6" /> : index + 1}
                       </div>
-                      
+
                       <div className="flex-1 space-y-3">
                         <p className="font-bold text-slate-200 leading-tight">
                           {mission.repere_textuel || "Client " + mission.phone}
                         </p>
-                        
+
                         {!isCompleted && (
                           <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
                             {gpsUrl && (
@@ -313,19 +311,19 @@ export default function AgentPage() {
               <h2 className="text-2xl font-black text-slate-900">Complétez votre profil</h2>
               <p className="text-slate-500 font-medium mt-2">Veuillez renseigner vos informations pour apparaître dans le système.</p>
             </div>
-            
+
             <form onSubmit={async (e) => {
               e.preventDefault()
               const formData = new FormData(e.currentTarget)
               const phone = formData.get('phone') as string
               const repere_textuel = formData.get('repere_textuel') as string
-              
+
               const supabase = createClient()
               const { error } = await supabase
                 .from('profiles')
                 .update({ phone, repere_textuel })
                 .eq('id', agentId)
-              
+
               if (!error) {
                 setAgentProfile({ ...agentProfile, phone, repere_textuel })
                 setShowProfileModal(false)
@@ -336,8 +334,8 @@ export default function AgentPage() {
             }} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Numéro de téléphone</label>
-                <input 
-                  type="tel" 
+                <input
+                  type="tel"
                   name="phone"
                   defaultValue={agentProfile?.phone || ''}
                   required
@@ -345,10 +343,10 @@ export default function AgentPage() {
                   placeholder="+237 6XX XXX XXX"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-2">Adresse / Repère textuel</label>
-                <textarea 
+                <textarea
                   name="repere_textuel"
                   defaultValue={agentProfile?.repere_textuel || ''}
                   required
@@ -357,16 +355,16 @@ export default function AgentPage() {
                   placeholder="Ex: Quartier, près du marché, maison bleue..."
                 />
               </div>
-              
+
               <div className="flex gap-3 pt-4">
-                <button 
+                <button
                   type="button"
                   onClick={() => setShowProfileModal(false)}
                   className="flex-1 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors"
                 >
                   Annuler
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
                 >
@@ -385,20 +383,20 @@ export default function AgentPage() {
             {photoData ? (
               <img src={photoData} alt="Aperçu" className="w-full h-full object-cover" />
             ) : cameraError ? (
-               <div className="text-center p-6 space-y-4">
-                 <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto">
-                    <AlertTriangle className="w-10 h-10 text-amber-500" />
-                 </div>
-                 <h3 className="text-white font-bold text-lg">Caméra indisponible</h3>
-                 <p className="text-slate-400 text-sm">Nous n'avons pas pu accéder à votre appareil photo. Veuillez importer une photo depuis votre galerie.</p>
-               </div>
+              <div className="text-center p-6 space-y-4">
+                <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto">
+                  <AlertTriangle className="w-10 h-10 text-amber-500" />
+                </div>
+                <h3 className="text-white font-bold text-lg">Caméra indisponible</h3>
+                <p className="text-slate-400 text-sm">Nous n'avons pas pu accéder à votre appareil photo. Veuillez importer une photo depuis votre galerie.</p>
+              </div>
             ) : (
               <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
             )}
             <canvas ref={canvasRef} className="hidden" />
 
             <div className="absolute top-0 left-0 w-full p-6 bg-gradient-to-b from-black/80 to-transparent">
-              <button 
+              <button
                 onClick={() => { setActiveMission(null); setCameraError(false); }}
                 className="text-white text-sm font-bold mb-6 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md"
               >
@@ -413,15 +411,15 @@ export default function AgentPage() {
             {!photoData ? (
               cameraError ? (
                 <div>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    capture="environment" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
                     onChange={handleFileUpload}
                     ref={fileInputRef}
                     className="hidden"
                   />
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-black text-lg transition-colors"
                   >
@@ -430,7 +428,7 @@ export default function AgentPage() {
                   </button>
                 </div>
               ) : (
-                <button 
+                <button
                   onClick={takePhoto}
                   className="w-full bg-slate-800 hover:bg-slate-700 text-white py-5 rounded-2xl flex items-center justify-center gap-3 font-black text-lg shadow-xl"
                 >
@@ -440,13 +438,13 @@ export default function AgentPage() {
               )
             ) : (
               <div className="flex gap-4">
-                <button 
+                <button
                   onClick={() => setPhotoData(null)}
                   className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-2xl font-bold transition-colors"
                 >
                   Reprendre
                 </button>
-                <button 
+                <button
                   onClick={handleValidate}
                   className="flex-1 bg-green-500 hover:bg-green-400 text-slate-950 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-colors"
                 >

@@ -42,7 +42,7 @@ async function main() {
 
   if (signInError) {
     console.log(`   ⚠️  Connexion échouée (${signInError.message}), tentative d'inscription...`)
-    
+
     // 3. Créer le compte
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: ADMIN_EMAIL,
@@ -56,7 +56,7 @@ async function main() {
 
     userId = signUpData.user?.id
     console.log(`✅ Compte créé — ID: ${userId}`)
-    
+
     // Attendre un peu pour le trigger
     await new Promise(r => setTimeout(r, 1500))
   } else {
@@ -80,7 +80,7 @@ async function main() {
   if (profileError) {
     console.log(`   ⚠️  Profil non trouvé (${profileError.message})`)
     console.log('   ➡️  Création du profil admin...')
-    
+
     const { error: insertError } = await supabase
       .from('profiles')
       .insert({ id: userId, role: 'admin', phone: '600000000' })
@@ -94,7 +94,7 @@ async function main() {
     }
   } else {
     console.log(`   Profil trouvé — Rôle actuel: "${profile.role}"`)
-    
+
     if (profile.role !== 'admin') {
       console.log('   ➡️  Mise à jour du rôle vers "admin"...')
       const { error: updateError } = await supabase

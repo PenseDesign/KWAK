@@ -23,7 +23,7 @@ export function PendingAgents({ agents }: { agents: any[] }) {
                     <h2 className="text-lg font-semibold text-slate-900">Agents en attente ({agents.length})</h2>
                 </div>
             </div>
-            
+
             <div className="divide-y divide-slate-50">
                 {agents.map((agent) => (
                     <div key={agent.id} className="p-6 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
@@ -36,9 +36,9 @@ export function PendingAgents({ agents }: { agents: any[] }) {
                                 <p className="text-sm text-slate-500">{agent.phone || 'Pas de numéro'}</p>
                             </div>
                         </div>
-                        
+
                         <div className="flex gap-2">
-                            <button 
+                            <button
                                 onClick={() => handleApprove(agent.id)}
                                 disabled={isPending}
                                 className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl font-bold text-sm hover:bg-green-100 transition-all disabled:opacity-50"

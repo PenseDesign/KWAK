@@ -23,14 +23,14 @@ export default function AdminPage() {
   const [pendingAgents, setPendingAgents] = useState<any[]>([])
   const [pendingDemandes, setPendingDemandes] = useState<any[]>([])
   const [refreshing, setRefreshing] = useState(false)
-  
+
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'overview'
 
   const fetchData = async () => {
     try {
       const supabase = createClient()
-      
+
       const [statsData, passagesData, usersData, zonesData, agentsData, demandesData] = await Promise.all([
         getAdminStats(),
         supabase.from('passages').select('*, profiles:client_id(repere_textuel, phone)').order('heure_passage', { ascending: false, nullsFirst: false }).limit(10),
@@ -110,14 +110,13 @@ export default function AdminPage() {
           const Icon = tab.icon
           const isActive = currentTab === tab.id
           return (
-            <Link 
+            <Link
               key={tab.id}
               href={`/admin?tab=${tab.id}`}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap border ${
-                isActive 
-                  ? 'bg-white text-green-600 border-green-200 shadow-sm' 
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap border ${isActive
+                  ? 'bg-white text-green-600 border-green-200 shadow-sm'
                   : 'bg-transparent text-slate-500 border-transparent hover:bg-slate-200/50 hover:text-slate-700'
-              }`}
+                }`}
             >
               <Icon className="w-5 h-5" />
               {tab.name}
@@ -154,13 +153,13 @@ export default function AdminPage() {
 
             <div className="grid lg:grid-cols-2 gap-8">
               <SignalementsList />
-              
+
               <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
                 <div className="p-6 border-b border-slate-50 flex items-center gap-3">
                   <Activity className="w-6 h-6 text-slate-400" />
                   <h2 className="text-xl font-bold text-slate-900">Activités Récentes</h2>
                 </div>
-                
+
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm text-slate-600">
                     <thead className="bg-slate-50/50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
