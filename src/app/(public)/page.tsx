@@ -16,7 +16,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <Image src="/logo.jpeg" alt="LePointCitoyen" width={44} height={44} className="rounded-xl" />
+              <Image src="/logo.jpeg" alt="LePointCitoyen" width={50} height={50} className="rounded-xl" />
               <span className="text-xl font-black tracking-tighter text-slate-900">LEPOINCITOYEN</span>
             </div>
 
