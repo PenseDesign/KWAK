@@ -136,7 +136,7 @@ function AdminPageContent() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Collectes</p>
-                  <p className="text-3xl font-black text-slate-900">{stats.totalCollectes}</p>
+                  <p className="text-3xl font-black text-slate-900">{stats?.totalCollectes || 0}</p>
                 </div>
               </div>
 
@@ -146,7 +146,7 @@ function AdminPageContent() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Revenus (FCFA)</p>
-                  <p className="text-3xl font-black text-slate-900">{stats.revenusEstimes.toLocaleString()}</p>
+                  <p className="text-3xl font-black text-slate-900">{stats?.revenusEstimes?.toLocaleString() || 0}</p>
                 </div>
               </div>
             </div>
@@ -166,7 +166,6 @@ function AdminPageContent() {
                       <tr>
                         <th className="px-6 py-4">ID / Adresse</th>
                         <th className="px-6 py-4">Date</th>
-                        <th className="px-6 py-4">Statut</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
@@ -174,53 +173,45 @@ function AdminPageContent() {
                         <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-6 py-4">
                             <div className="font-bold text-slate-900">{p.profiles?.repere_textuel || 'Adresse non spécifiée'}</div>
-                            <div className="text-xs text-slate-500 font-medium">{p.profiles?.phone || 'Pas de numéro'}</div>
                           </td>
-                          <td className="px-6 py-4 font-medium text-slate-500">
-                            {p.heure_passage ? new Date(p.heure_passage).toLocaleString('fr-FR') : 'En attente'}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider
-                              ${p.status === 'en_attente' ? 'bg-amber-50 text-amber-600' : ''}
-                              ${p.status === 'valide' ? 'bg-green-50 text-green-600' : ''}
-                              ${p.status === 'absent' ? 'bg-red-50 text-red-600' : ''}
-                              ${p.status === 'impossible' ? 'bg-slate-100 text-slate-600' : ''}
-                            `}>
-                              {p.status}
-                            </span>
+                          <td className="px-6 py-4 text-xs font-medium text-slate-500">
+                            {p.heure_passage ? new Date(p.heure_passage).toLocaleDateString() : 'N/A'}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {(!recentPassages || recentPassages.length === 0) && (
-                    <div className="p-12 text-center text-slate-400 font-medium">
-                      Aucune activité récente.
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              <PendingAgents agents={pendingAgents} />
+              <PendingAbonnements demandes={pendingDemandes} />
+            </div>
           </div>
         )}
 
+        {/* USERS TAB */}
         {currentTab === 'users' && <UsersTable users={users} />}
 
+        {/* ZONES TAB */}
         {currentTab === 'zones' && (
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-8 items-start">
+            <div className="lg:col-span-1">
+              <CreateTournee />
+            </div>
             <div className="lg:col-span-2">
               <ZonesView zones={zones} />
             </div>
-            <div>
-              <CreateTournee />
-            </div>
           </div>
         )}
 
+        {/* VALIDATIONS TAB */}
         {currentTab === 'validations' && (
           <div className="grid lg:grid-cols-2 gap-8">
-            <PendingAbonnements demandes={pendingDemandes} />
             <PendingAgents agents={pendingAgents} />
+            <PendingAbonnements demandes={pendingDemandes} />
           </div>
         )}
       </div>
