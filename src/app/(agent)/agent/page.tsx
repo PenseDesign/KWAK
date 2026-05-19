@@ -5,7 +5,7 @@ import { getAgentTournee, signOut, reportIssue } from '../../actions'
 import { createClient } from '../../../lib/supabase/client'
 import { useSync } from '../../../hooks/offline/useSync'
 import { optimizeRoute } from '../../../lib/tournee/engine'
-import { MapPin, Download, CheckCircle, Camera, Loader2, LogOut, Phone as PhoneIcon, MessageSquare, AlertTriangle, Navigation, Upload } from 'lucide-react'
+import { MapPin, Download, CheckCircle, Camera, Loader2, LogOut, Phone as PhoneIcon, MessageSquare, AlertTriangle, Navigation, Upload, X } from 'lucide-react'
 import { ClientMission } from '../../../lib/types/database'
 import NetworkAlert from '../../../components/shared/NetworkAlert'
 
@@ -20,6 +20,9 @@ export default function AgentPage() {
   const [cameraError, setCameraError] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [agentProfile, setAgentProfile] = useState<any>(null)
+  
+  // Notification Toast state
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -28,6 +31,13 @@ export default function AgentPage() {
   const { cachedTournee, saveTournee, queuePassageValidation, offlineQueueCount, isSyncing } = useSync()
 
   const [agentId, setAgentId] = useState<string | null>(null)
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setNotification({ message, type })
+    setTimeout(() => {
+      setNotification(prev => prev?.message === message ? null : prev)
+    }, 4000)
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -63,12 +73,13 @@ export default function AgentPage() {
       if (res.success && res.missions && res.missions.length > 0) {
         const optimized = optimizeRoute(res.missions)
         await saveTournee(optimized)
+        showNotification("Tournée téléchargée et optimisée !", 'success')
       } else {
-        alert("Aucune tournée n'est prévue pour vous aujourd'hui.")
+        showNotification("Aucune tournée n'est prévue pour vous aujourd'hui.", 'info')
       }
     } catch (e) {
       console.error(e)
-      alert("Erreur lors du téléchargement. Vérifiez votre connexion.")
+      showNotification("Erreur lors du téléchargement. Vérifiez votre connexion.", 'error')
     } finally {
       setLoading(false)
     }
@@ -132,6 +143,7 @@ export default function AgentPage() {
     if (!activeMission) return
 
     await queuePassageValidation(activeMission.passage_id, 'valide', photoData || undefined)
+    showNotification("Passage validé !", 'success')
 
     // Reset state
     setActiveMission(null)
@@ -150,9 +162,10 @@ export default function AgentPage() {
 
     if (res.success) {
       setReportSuccess(true)
+      showNotification("Incident signalé avec succès !", 'success')
       setTimeout(() => setReportSuccess(false), 3000)
     } else {
-      alert("Erreur lors du signalement.")
+      showNotification("Erreur lors du signalement.", 'error')
     }
   }
 
@@ -164,7 +177,7 @@ export default function AgentPage() {
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 pb-24 font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-50 pb-24 font-sans relative">
       <NetworkAlert />
 
       <div className="p-4">
@@ -327,9 +340,9 @@ export default function AgentPage() {
               if (!error) {
                 setAgentProfile({ ...agentProfile, phone, repere_textuel })
                 setShowProfileModal(false)
-                alert('Profil mis à jour avec succès!')
+                showNotification('Profil mis à jour avec succès!', 'success')
               } else {
-                alert('Erreur lors de la mise à jour du profil.')
+                showNotification('Erreur lors de la mise à jour du profil.', 'error')
               }
             }} className="space-y-4">
               <div>
@@ -453,6 +466,30 @@ export default function AgentPage() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Elegant Toast notification banner */}
+      {notification && (
+        <div className="fixed bottom-6 left-4 right-4 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className={`p-4 rounded-2xl shadow-2xl border flex items-center gap-3 ${
+            notification.type === 'success' 
+              ? 'bg-green-950/90 border-green-800 text-green-200' 
+              : notification.type === 'error'
+              ? 'bg-red-950/90 border-red-900 text-red-200'
+              : 'bg-slate-900/95 border-slate-800 text-slate-200'
+          }`}>
+            {notification.type === 'success' && <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />}
+            {notification.type === 'error' && <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />}
+            {notification.type === 'info' && <Loader2 className="w-5 h-5 animate-spin text-blue-400 shrink-0" />}
+            <span className="font-semibold text-sm flex-1">{notification.message}</span>
+            <button 
+              onClick={() => setNotification(null)}
+              className="p-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
           </div>
         </div>
       )}
