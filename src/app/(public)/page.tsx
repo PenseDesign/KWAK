@@ -16,7 +16,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <Image src="/logo.jpeg" alt="LePointCitoyen" width={50} height={50} className="rounded-xl" />
+              <Image src="/logo.jpeg" alt="LePointCitoyen" width={140} height={140} className="rounded-xl" />
               <span className="text-xl font-black tracking-tighter text-slate-900">LEPOINCITOYEN</span>
             </div>
 
@@ -80,7 +80,7 @@ export default function LandingPage() {
               <div className="absolute -inset-4 bg-green-200/30 rounded-[3rem] blur-3xl -z-10"></div>
               <div className="relative bg-white p-3 rounded-[3rem] shadow-2xl shadow-slate-200 rotate-1">
                 <Image
-                  src="/agents-team.png"
+                  src="/hero.png"
                   alt="Agents LEPOINCITOYEN sur le terrain à Douala"
                   width={600}
                   height={600}
@@ -177,7 +177,7 @@ export default function LandingPage() {
             {/* Photo 1 — Agent de dos */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
               <Image
-                src="/agent-back.png"
+                src="/agent-back.jpeg"
                 alt="Agent LEPOINCITOYEN en mission dans les rues de Douala"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -193,7 +193,7 @@ export default function LandingPage() {
             {/* Photo 2 — Équipe */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
               <Image
-                src="/agents-team.png"
+                src="/agents-team.jpeg"
                 alt="Équipe d'agents LEPOINCITOYEN prêts pour la collecte"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -209,7 +209,7 @@ export default function LandingPage() {
             {/* Photo 3 — Tricycle */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
               <Image
-                src="/agents-tricycle.png"
+                src="/agents-tricycle.jpeg"
                 alt="Agents LEPOINCITOYEN avec leur véhicule de collecte"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
@@ -259,7 +259,7 @@ export default function LandingPage() {
               <div className="hidden md:block">
                 <div className="relative rounded-[3rem] overflow-hidden shadow-2xl rotate-2">
                   <Image
-                    src="/agent-back.png"
+                    src="/agent-back.jpeg"
                     alt="Agent LEPOINCITOYEN — Service Certifié CUD"
                     width={500}
                     height={600}
@@ -278,7 +278,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-16 text-center md:text-left">
             <div className="space-y-6">
               <div className="flex items-center gap-2 justify-center md:justify-start">
-                <Image src="/logo.png" alt="LePointCitoyen" width={32} height={32} className="rounded-lg" />
+                <Image src="/logo.jpeg" alt="LePointCitoyen" width={60} height={60} className="rounded-lg" />
                 <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
               </div>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">

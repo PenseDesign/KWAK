@@ -54,11 +54,11 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md space-y-8">
-        
+
         {/* Header */}
         <div className="text-center space-y-4">
           <Link href="/" className="inline-block">
-            <Image src="/logo.png" alt="LePointCitoyen" width={80} height={80} />
+            <Image src="/logo.jpeg" alt="LePointCitoyen" width={100} height={100} />
           </Link>
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Créer un compte</h1>
@@ -69,7 +69,7 @@ export default function RegisterPage() {
         {/* Card */}
         <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
@@ -82,11 +82,10 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setRole('client')}
-                className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                  role === 'client' 
-                    ? 'border-green-600 bg-green-50 text-green-700' 
-                    : 'border-slate-100 bg-slate-50 text-slate-500'
-                }`}
+                className={`p-4 rounded-2xl border-2 text-left transition-all ${role === 'client'
+                  ? 'border-green-600 bg-green-50 text-green-700'
+                  : 'border-slate-100 bg-slate-50 text-slate-500'
+                  }`}
               >
                 <Home className={`w-6 h-6 mb-2 ${role === 'client' ? 'text-green-600' : 'text-slate-400'}`} />
                 <span className="block font-bold text-sm">Ménage</span>
@@ -96,11 +95,10 @@ export default function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setRole('pending_agent')}
-                className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                  role === 'pending_agent' 
-                    ? 'border-green-600 bg-green-50 text-green-700' 
-                    : 'border-slate-100 bg-slate-50 text-slate-500'
-                }`}
+                className={`p-4 rounded-2xl border-2 text-left transition-all ${role === 'pending_agent'
+                  ? 'border-green-600 bg-green-50 text-green-700'
+                  : 'border-slate-100 bg-slate-50 text-slate-500'
+                  }`}
               >
                 <Truck className={`w-6 h-6 mb-2 ${role === 'pending_agent' ? 'text-green-600' : 'text-slate-400'}`} />
                 <span className="block font-bold text-sm">Agent</span>
