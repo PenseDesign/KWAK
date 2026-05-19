@@ -10,16 +10,16 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-green-100 selection:text-green-900">
-      
+
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <Image src="/logo.png" alt="LePointCitoyen" width={44} height={44} className="rounded-xl" />
+              <Image src="/logo.jpeg" alt="LePointCitoyen" width={44} height={44} className="rounded-xl" />
               <span className="text-xl font-black tracking-tighter text-slate-900">LEPOINCITOYEN</span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-8">
               <a href="#services" className="text-sm font-semibold text-slate-600 hover:text-green-600 transition-colors">Services</a>
               <a href="#pro" className="text-sm font-semibold text-slate-600 hover:text-green-600 transition-colors">Agent</a>
@@ -79,11 +79,11 @@ export default function LandingPage() {
             <div className="relative lg:ml-10">
               <div className="absolute -inset-4 bg-green-200/30 rounded-[3rem] blur-3xl -z-10"></div>
               <div className="relative bg-white p-3 rounded-[3rem] shadow-2xl shadow-slate-200 rotate-1">
-                <Image 
-                  src="/agents-team.png" 
-                  alt="Agents LEPOINCITOYEN sur le terrain à Douala" 
-                  width={600} 
-                  height={600} 
+                <Image
+                  src="/agents-team.png"
+                  alt="Agents LEPOINCITOYEN sur le terrain à Douala"
+                  width={600}
+                  height={600}
                   className="rounded-[2.5rem] w-full h-auto object-cover"
                   priority
                 />
@@ -110,7 +110,7 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-black tracking-tight">Pourquoi choisir LEPOINCITOYEN ?</h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">Une technologie pensée pour les réalités du terrain, assurant une ville plus propre chaque jour.</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all group">
               <div className="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
@@ -172,16 +172,16 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-black tracking-tight">Nos agents sur le terrain</h2>
             <p className="text-slate-500 font-medium max-w-2xl mx-auto">Des hommes et des femmes dévoués, formés et équipés, qui parcourent vos quartiers chaque jour pour une ville plus propre.</p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-6">
             {/* Photo 1 — Agent de dos */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
-              <Image 
-                src="/agent-back.png" 
-                alt="Agent LEPOINCITOYEN en mission dans les rues de Douala" 
-                fill 
+              <Image
+                src="/agent-back.png"
+                alt="Agent LEPOINCITOYEN en mission dans les rues de Douala"
+                fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -192,12 +192,12 @@ export default function LandingPage() {
 
             {/* Photo 2 — Équipe */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
-              <Image 
-                src="/agents-team.png" 
-                alt="Équipe d'agents LEPOINCITOYEN prêts pour la collecte" 
-                fill 
+              <Image
+                src="/agents-team.png"
+                alt="Équipe d'agents LEPOINCITOYEN prêts pour la collecte"
+                fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -208,12 +208,12 @@ export default function LandingPage() {
 
             {/* Photo 3 — Tricycle */}
             <div className="group relative overflow-hidden rounded-[2.5rem] aspect-[4/5] shadow-lg">
-              <Image 
-                src="/agents-tricycle.png" 
-                alt="Agents LEPOINCITOYEN avec leur véhicule de collecte" 
-                fill 
+              <Image
+                src="/agents-tricycle.png"
+                alt="Agents LEPOINCITOYEN avec leur véhicule de collecte"
+                fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -230,11 +230,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-slate-900 rounded-[4rem] p-8 md:p-20 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-1/2 h-full bg-green-600/10 blur-[120px] rounded-full translate-x-1/2"></div>
-            
+
             <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
               <div className="space-y-8">
                 <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.1]">
-                  Vous êtes un agent <br/> de collecte ?
+                  Vous êtes un agent <br /> de collecte ?
                 </h2>
                 <p className="text-xl text-slate-400 font-medium leading-relaxed">
                   Optimisez votre temps, gérez vos tournées même hors-ligne et soyez payé pour chaque mission accomplie en toute transparence.
@@ -258,11 +258,11 @@ export default function LandingPage() {
               </div>
               <div className="hidden md:block">
                 <div className="relative rounded-[3rem] overflow-hidden shadow-2xl rotate-2">
-                  <Image 
-                    src="/agent-back.png" 
-                    alt="Agent LEPOINCITOYEN — Service Certifié CUD" 
-                    width={500} 
-                    height={600} 
+                  <Image
+                    src="/agent-back.png"
+                    alt="Agent LEPOINCITOYEN — Service Certifié CUD"
+                    width={500}
+                    height={600}
                     className="w-full h-auto object-cover"
                   />
                 </div>
@@ -285,7 +285,7 @@ export default function LandingPage() {
                 La plateforme qui rend nos villes plus propres, un ramassage après l'autre.
               </p>
             </div>
-            
+
             <div className="space-y-6">
               <h4 className="font-black text-slate-900">Application</h4>
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
@@ -312,7 +312,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="pt-8 border-t border-slate-100 text-center">
             <p className="text-sm text-slate-400 font-medium">
               © {new Date().getFullYear()} LEPOINCITOYEN — Précollecte et Valorisation Responsable. Fait avec passion pour nos villes.

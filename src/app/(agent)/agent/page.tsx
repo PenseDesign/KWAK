@@ -20,7 +20,7 @@ export default function AgentPage() {
   const [cameraError, setCameraError] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [agentProfile, setAgentProfile] = useState<any>(null)
-  
+
   // Notification Toast state
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
 
@@ -473,18 +473,17 @@ export default function AgentPage() {
       {/* Elegant Toast notification banner */}
       {notification && (
         <div className="fixed bottom-6 left-4 right-4 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <div className={`p-4 rounded-2xl shadow-2xl border flex items-center gap-3 ${
-            notification.type === 'success' 
-              ? 'bg-green-950/90 border-green-800 text-green-200' 
-              : notification.type === 'error'
+          <div className={`p-4 rounded-2xl shadow-2xl border flex items-center gap-3 ${notification.type === 'success'
+            ? 'bg-green-950/90 border-green-800 text-green-200'
+            : notification.type === 'error'
               ? 'bg-red-950/90 border-red-900 text-red-200'
               : 'bg-slate-900/95 border-slate-800 text-slate-200'
-          }`}>
+            }`}>
             {notification.type === 'success' && <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />}
             {notification.type === 'error' && <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />}
             {notification.type === 'info' && <Loader2 className="w-5 h-5 animate-spin text-blue-400 shrink-0" />}
             <span className="font-semibold text-sm flex-1">{notification.message}</span>
-            <button 
+            <button
               onClick={() => setNotification(null)}
               className="p-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
             >
