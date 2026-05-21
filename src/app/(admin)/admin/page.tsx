@@ -11,6 +11,7 @@ import { CreateTournee } from '../../../components/admin/CreateTournee'
 import { SignalementsList } from '../../../components/admin/SignalementsList'
 import { UsersTable } from '../../../components/admin/UsersTable'
 import { ZonesView } from '../../../components/admin/ZonesView'
+import { TourneesList } from '../../../components/admin/TourneesList'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 
@@ -201,7 +202,8 @@ function AdminPageContent() {
             <div className="lg:col-span-1">
               <CreateTournee />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-8">
+              <TourneesList />
               <ZonesView zones={zones} />
             </div>
           </div>

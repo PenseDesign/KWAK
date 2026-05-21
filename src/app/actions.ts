@@ -126,12 +126,38 @@ export async function getClientStatus(clientId: string) {
   // Chercher le prochain passage prévu
   const { data: nextPassage } = await supabase
     .from('passages')
-    .select('date_prevue')
+    .select('id, date_prevue, tournee_id')
     .eq('client_id', clientId)
     .eq('status', 'en_attente')
     .order('date_prevue', { ascending: true })
     .limit(1)
     .single()
+
+  let estimatedTime = "07:30 - 09:00"
+
+  if (nextPassage?.tournee_id) {
+    const { data: allPassages } = await supabase
+      .from('passages')
+      .select('id')
+      .eq('tournee_id', nextPassage.tournee_id)
+      .order('id', { ascending: true })
+    
+    if (allPassages) {
+      const index = allPassages.findIndex(p => p.id === nextPassage.id)
+      if (index !== -1) {
+        const startMinutes = 7 * 60 + 30 + (index * 15)
+        const endMinutes = startMinutes + 30
+        
+        const formatTime = (totalMin: number) => {
+          const h = Math.floor(totalMin / 60)
+          const m = totalMin % 60
+          return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+        }
+        
+        estimatedTime = `${formatTime(startMinutes)} - ${formatTime(endMinutes)}`
+      }
+    }
+  }
 
   // Récupérer l'historique des passages validés
   const { data: historique } = await supabase
@@ -153,6 +179,7 @@ export async function getClientStatus(clientId: string) {
     abonnement, 
     profile,
     nextPassageDate: nextPassage?.date_prevue || null,
+    estimatedTime,
     historique: historique || []
   }
 }
@@ -449,6 +476,26 @@ export async function updateProfile(formData: FormData) {
   return { success: true }
 }
 
+export async function updateJoursPassage(jours: number[]) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+
+  // Vérifier qu'on est bien entre lundi (1) et jeudi (4)
+  const isValid = jours.every(j => j >= 1 && j <= 4)
+  if (!isValid) return { success: false, error: 'Les jours doivent être compris entre lundi et jeudi.' }
+
+  const { error } = await supabase
+    .from('abonnements')
+    .update({ jours_passage: jours })
+    .eq('client_id', user.id)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
 export async function getAgents() {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -712,4 +759,93 @@ export async function getZonesStats() {
     .sort((a, b) => b.count - a.count)
 
   return { success: true, zones }
+}
+
+export async function getTourneesByDate(date: string) {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('tournees')
+    .select(`
+      *,
+      agent:agent_id(id, phone, repere_textuel),
+      passages:id(count)
+    `)
+    .eq('date', date)
+    .order('created_at', { ascending: false })
+
+  if (error) return { success: false, tournees: [] }
+  return { success: true, tournees: data }
+}
+
+export async function getTourneeDetails(tourneeId: string) {
+  const supabase = await createClient()
+
+  const { data: tournee, error: tourneeError } = await supabase
+    .from('tournees')
+    .select('*, agent:agent_id(phone, repere_textuel)')
+    .eq('id', tourneeId)
+    .single()
+
+  if (tourneeError || !tournee) return { success: false, error: 'Tournée introuvable' }
+
+  const { data: passages, error: passagesError } = await supabase
+    .from('passages')
+    .select('*, client:client_id(id, phone, repere_textuel, coords_gps)')
+    .eq('tournee_id', tourneeId)
+
+  if (passagesError) return { success: false, error: passagesError.message }
+
+  return { success: true, tournee, passages }
+}
+
+export async function updateClientZone(clientId: string, zonePrefix: string) {
+  const supabase = await createClient()
+  
+  // On récupère d'abord l'adresse actuelle
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('repere_textuel')
+    .eq('id', clientId)
+    .single()
+
+  if (!profile) return { success: false, error: 'Client introuvable' }
+
+  let currentAddress = profile.repere_textuel || ''
+  
+  // Si l'adresse contient déjà une virgule, on remplace la première partie (le quartier)
+  let newAddress = ''
+  if (currentAddress.includes(',')) {
+    const parts = currentAddress.split(',')
+    parts[0] = zonePrefix // Remplacer le quartier
+    newAddress = parts.join(',')
+  } else {
+    // Sinon on ajoute la zone comme préfixe
+    newAddress = currentAddress ? `${zonePrefix}, ${currentAddress}` : zonePrefix
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ repere_textuel: newAddress })
+    .eq('id', clientId)
+
+  if (error) return { success: false, error: error.message }
+  
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+export async function getClientsByZone(zonePrefix: string) {
+  const supabase = await createClient()
+  
+  // Il faut chercher tous les clients dont le repere_textuel commence par la zone
+  // On utilise ilike pour la recherche textuelle
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, phone, repere_textuel, coords_gps, photo_facade_url')
+    .eq('role', 'client')
+    .ilike('repere_textuel', `${zonePrefix}%`)
+
+  if (error) return { success: false, clients: [] }
+  return { success: true, clients: data }
 }

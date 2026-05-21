@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '../../../lib/supabase/client'
 import Image from 'next/image'
+import { JoursPassageSelector } from '../../../components/client/JoursPassageSelector'
 
 export default function DashboardContent() {
   const [loading, setLoading] = useState(true)
@@ -222,7 +223,7 @@ export default function DashboardContent() {
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col items-center">
                 <Clock className="w-8 h-8 text-green-400 mb-2" />
                 <span className="text-xs font-bold text-slate-300">Heure estimée</span>
-                <span className="text-xl font-black">07:30 - 09:00</span>
+                <span className="text-xl font-black">{statusData?.estimatedTime || '07:30 - 09:00'}</span>
               </div>
             </div>
           </div>
@@ -267,6 +268,14 @@ export default function DashboardContent() {
         {/* Right Column: Mini Info Cards */}
         <div className="space-y-6">
 
+          {/* Jours de passage (seulement si actif) */}
+          {abonnement?.status === 'actif' && (
+            <JoursPassageSelector
+              initialJours={abonnement.jours_passage}
+              typeForfait={abonnement.type_forfait}
+            />
+          )}
+
           {/* Signalement Card */}
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 space-y-6">
             <div className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center">
@@ -275,7 +284,7 @@ export default function DashboardContent() {
             <div className="space-y-2">
               <h3 className="text-xl font-black text-slate-900">Un problème ?</h3>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                Si le camion n'est pas passé ou si vous avez une réclamation, signalez-le ici.
+                Si les agents ne sont pas passés ou si vous avez une réclamation, signalez-le ici.
               </p>
             </div>
             <button
