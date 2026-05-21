@@ -5,6 +5,7 @@ export type Profile = {
   repere_textuel: string
   photo_facade_url: string
   coords_gps: { lat: number; lng: number }
+  full_name?: string
 }
 
 export type Abonnement = {
@@ -16,9 +17,13 @@ export type Abonnement = {
 
 export type Tournee = {
   id: string
-  agent_id: string
-  date: string
-  statut: 'prete' | 'en_cours' | 'terminee'
+  agent_id?: string // Deprecated
+  agents_ids: string[]
+  nom: string
+  zone_cible: string
+  status: 'active' | 'inactive'
+  date?: string // Deprecated
+  statut?: 'prete' | 'en_cours' | 'terminee' // Deprecated
 }
 
 export type Passage = {
