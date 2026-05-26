@@ -45,7 +45,7 @@ export default function DashboardContent() {
     if (!user) return
     const fetchStatus = async () => {
       try {
-        const data = await getClientStatus(user.id)
+        const data = await getClientStatus()
         setStatusData(data)
       } catch (e) {
         console.error(e)
@@ -63,7 +63,7 @@ export default function DashboardContent() {
   const handleReport = async () => {
     if (!user) return
     setReporting(true)
-    await reportIssue(user.id, "Le camion n'est pas passé")
+    await reportIssue("Le camion n'est pas passé")
     setReportSuccess(true)
     setReporting(false)
     setTimeout(() => setReportSuccess(false), 5000)

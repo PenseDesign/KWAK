@@ -69,7 +69,7 @@ export default function AgentPage() {
 
     setLoading(true)
     try {
-      const res = await getAgentTournee(agentId)
+      const res = await getAgentTournee()
       if (res.success && res.missions && res.missions.length > 0) {
         const optimized = optimizeRoute(res.missions)
         await saveTournee(optimized)
@@ -157,7 +157,7 @@ export default function AgentPage() {
     if (!reason) return
 
     setReporting(true)
-    const res = await reportIssue(agentId, reason)
+    const res = await reportIssue(reason)
     setReporting(false)
 
     if (res.success) {

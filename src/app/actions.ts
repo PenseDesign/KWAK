@@ -5,8 +5,11 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { Passage, Tournee, ClientMission } from '../lib/types/database'
 
-export async function getAgentTournee(agentId: string) {
+export async function getAgentTournee() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, missions: [], error: 'Non authentifié' }
+  const agentId = user.id
 
   // 1. Trouver la tournée du jour pour cet agent
   const today = new Date().toISOString().split('T')[0]
@@ -61,6 +64,8 @@ export async function getAgentTournee(agentId: string) {
 
 export async function validatePassage(passageId: string, status: Passage['status'], photoBase64?: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
 
   let photoUrl = null
 
@@ -114,8 +119,11 @@ export async function syncOfflineData(passagesToSync: Array<{ id: string, status
   return { success: true, synced: successCount, failed: failCount }
 }
 
-export async function getClientStatus(clientId: string) {
+export async function getClientStatus() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { abonnement: null, profile: null, nextPassageDate: null, estimatedTime: "07:30 - 09:00", historique: [] }
+  const clientId = user.id
 
   const { data: abonnement } = await supabase
     .from('abonnements')
@@ -184,13 +192,15 @@ export async function getClientStatus(clientId: string) {
   }
 }
 
-export async function reportIssue(clientId: string, message: string) {
+export async function reportIssue(message: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
 
   const { error } = await supabase
     .from('signalements')
     .insert({
-      client_id: clientId,
+      client_id: user.id,
       message,
       status: 'ouvert',
     })
@@ -207,9 +217,9 @@ export async function getAdminStats() {
     .select('*', { count: 'exact', head: true })
     .eq('date', new Date().toISOString().split('T')[0])
     
-  const { count: activeAbonnements } = await supabase
+  const { data: activeAbonnementsData } = await supabase
     .from('abonnements')
-    .select('*', { count: 'exact', head: true })
+    .select('type_forfait')
     .eq('status', 'actif')
 
   const { count: totalCollectes } = await supabase
@@ -217,11 +227,23 @@ export async function getAdminStats() {
     .select('*', { count: 'exact', head: true })
     .eq('status', 'valide')
 
+  const activeAbonnements = activeAbonnementsData?.length || 0;
+
+  let revenusEstimes = 0;
+  if (activeAbonnementsData) {
+    revenusEstimes = activeAbonnementsData.reduce((total, sub) => {
+      if (sub.type_forfait === 'Mensuel Basique') return total + 2500;
+      if (sub.type_forfait === 'Mensuel Pro') return total + 3000;
+      if (sub.type_forfait === 'Hebdomadaire') return total + (700 * 4); // Estimé au mois
+      return total;
+    }, 0);
+  }
+
   return {
     tourneesDuJour: totalTournees || 0,
-    abonnementsActifs: activeAbonnements || 0,
+    abonnementsActifs: activeAbonnements,
     totalCollectes: totalCollectes || 0,
-    revenusEstimes: (activeAbonnements || 0) * 5000, // Exemple: 5000 FCFA par abonnement
+    revenusEstimes,
     agentsEnLigne: 5,
   }
 }
@@ -307,6 +329,11 @@ export async function getPendingAgents() {
 
 export async function approveAgent(agentId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') return { success: false, error: 'Action non autorisée' }
+
   const { error } = await supabase
     .from('profiles')
     .update({ role: 'agent' })
@@ -379,6 +406,10 @@ export async function createDemandeAbonnement(formData: FormData) {
 
 export async function activateAbonnement(demandeId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') return { success: false, error: 'Action non autorisée' }
 
   const { data: demande, error: fetchError } = await supabase
     .from('demandes_abonnement')
@@ -509,6 +540,11 @@ export async function getAgents() {
 
 export async function createTournee(formData: FormData) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') return { success: false, error: 'Action non autorisée' }
+
   const agentId = formData.get('agent_id') as string
   const date = formData.get('date') as string
 
@@ -567,6 +603,11 @@ export async function getSignalements() {
 
 export async function resolveSignalement(id: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') return { success: false, error: 'Action non autorisée' }
+
   const { error } = await supabase
     .from('signalements')
     .update({ status: 'traité' })
