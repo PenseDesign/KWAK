@@ -17,6 +17,7 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   // Mensuel Pro a droit à 3 passages, les autres à 2 maximum
+  // Hebdomadaire donne droit à combien ? Supposons 2 pour le moment comme les autres.
   const maxDays = typeForfait === 'Mensuel Pro' ? 3 : 2
 
   const toggleDay = (dayId: number) => {
@@ -26,13 +27,18 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
       if (selectedDays.length < maxDays) {
         setSelectedDays([...selectedDays, dayId])
       } else {
-        setMessage({ type: 'error', text: `Vous ne pouvez choisir que ${maxDays} jours avec votre forfait.` })
+        setMessage({ type: 'error', text: `Votre forfait ${typeForfait} vous donne droit à exactement ${maxDays} jours de passage.` })
         setTimeout(() => setMessage(null), 3000)
       }
     }
   }
 
   const handleSave = async () => {
+    if (selectedDays.length !== maxDays) {
+      setMessage({ type: 'error', text: `Veuillez sélectionner exactement ${maxDays} jours.` })
+      return
+    }
+
     setIsUpdating(true)
     setMessage(null)
     const res = await updateJoursPassage(selectedDays)
@@ -46,6 +52,7 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
   }
 
   const hasChanged = JSON.stringify([...selectedDays].sort()) !== JSON.stringify([...initialJours].sort())
+  const isExactDays = selectedDays.length === maxDays
 
   return (
     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100">
@@ -55,7 +62,7 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
         </div>
         <div>
           <h3 className="text-xl font-black text-slate-900">Jours de passage</h3>
-          <p className="text-slate-500 text-sm font-medium">Choisissez vos {maxDays} jours de collecte</p>
+          <p className="text-slate-500 text-sm font-medium">Choisissez vos {maxDays} jours de collecte (Obligatoire)</p>
         </div>
       </div>
 
@@ -89,7 +96,7 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
 
       <button
         onClick={handleSave}
-        disabled={isUpdating || !hasChanged || selectedDays.length === 0}
+        disabled={isUpdating || !hasChanged || !isExactDays}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
       >
         {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : "Enregistrer mes choix"}
