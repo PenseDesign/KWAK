@@ -548,14 +548,17 @@ export async function createTournee(formData: FormData) {
   const agentId = formData.get('agent_id') as string
   const date = formData.get('date') as string
 
-  // 1. Créer la tournée
-  const { data: tournee, error: tourneeError } = await supabase
+  // 1. Vérifier si une tournée existe déjà pour cet agent à cette date
+  const { data: existingTournee } = await supabase
     .from('tournees')
-    .insert({ agent_id: agentId, date, statut: 'prete' })
-    .select()
-    .single()
+    .select('id')
+    .eq('agent_id', agentId)
+    .eq('date', date)
+    .maybeSingle()
 
-  if (tourneeError || !tournee) return { success: false, error: tourneeError?.message }
+  if (existingTournee) {
+    return { success: false, error: 'Une tournée existe déjà pour cet agent à cette date.' }
+  }
 
   // 2. Récupérer les clients abonnés actifs dont c'est le jour de passage
   const dayOfWeek = new Date(date).getDay() // 0 (Sun) to 6 (Sat)
@@ -567,10 +570,19 @@ export async function createTournee(formData: FormData) {
     .contains('jours_passage', [dayOfWeek])
 
   if (abonnesError || !abonnes?.length) {
-    return { success: false, error: 'Aucun client abonné actif trouvé.' }
+    return { success: false, error: 'Aucun client abonné actif trouvé pour ce jour.' }
   }
 
-  // 3. Générer un passage par client
+  // 3. Créer la tournée puisqu'on a des clients et qu'elle n'existe pas encore
+  const { data: tournee, error: tourneeError } = await supabase
+    .from('tournees')
+    .insert({ agent_id: agentId, date, statut: 'prete' })
+    .select()
+    .single()
+
+  if (tourneeError || !tournee) return { success: false, error: tourneeError?.message }
+
+  // 4. Générer un passage par client
   const passages = abonnes.map((a) => ({
     tournee_id: tournee.id,
     client_id: a.client_id,
