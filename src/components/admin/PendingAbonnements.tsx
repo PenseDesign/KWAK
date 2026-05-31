@@ -21,7 +21,7 @@ export function PendingAbonnements({ demandes }: { demandes: any[] }) {
   if (demandes.length === 0) return null
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden mb-10">
+    <div className="bg-green-100/50 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 overflow-hidden mb-10">
       <div className="p-6 border-b border-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CreditCard className="w-5 h-5 text-blue-500" />

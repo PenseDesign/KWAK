@@ -143,7 +143,7 @@ export function UsersTable({ users }: { users: any[] }) {
   return (
     <div className="space-y-6">
       {/* Top action block & stats overview */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-green-100/50 p-6 rounded-2xl border border-green-200 shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
         <div>
           <h2 className="text-2xl font-black text-slate-900 flex items-center gap-2">
             <UserCircle className="w-7 h-7 text-green-600" />
@@ -163,7 +163,7 @@ export function UsersTable({ users }: { users: any[] }) {
       </div>
 
       {/* Advanced filters card */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_20px_rgba(0,0,0,0.04)] space-y-4">
+      <div className="bg-green-100/50 p-6 rounded-2xl border border-green-200 shadow-[0_2px_20px_rgba(0,0,0,0.04)] space-y-4">
         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Filtres de recherche</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
@@ -173,14 +173,14 @@ export function UsersTable({ users }: { users: any[] }) {
               placeholder="Email, téléphone, quartier..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full font-medium"
+              className="pl-9 pr-4 py-2.5 bg-slate-50 border border-green-300 text-slate-900 rounded-xl text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full font-medium"
             />
           </div>
 
           <select 
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
+            className="px-4 py-2.5 bg-slate-50 border border-green-300 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
           >
             <option value="all">Tous les rôles</option>
             <option value="client">Clients</option>
@@ -192,7 +192,7 @@ export function UsersTable({ users }: { users: any[] }) {
           <select 
             value={filterAbo}
             onChange={(e) => setFilterAbo(e.target.value)}
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
+            className="px-4 py-2.5 bg-slate-50 border border-green-300 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
           >
             <option value="all">Tous les statuts d'abonnement</option>
             <option value="active">Abonnés Actifs</option>
@@ -203,7 +203,7 @@ export function UsersTable({ users }: { users: any[] }) {
           <select 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
+            className="px-4 py-2.5 bg-slate-50 border border-green-300 text-slate-700 rounded-xl text-sm font-bold focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 w-full"
           >
             <option value="newest">Plus récents d'abord</option>
             <option value="oldest">Plus anciens d'abord</option>
@@ -212,7 +212,7 @@ export function UsersTable({ users }: { users: any[] }) {
       </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+      <div className="bg-green-100/50 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50/50 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
@@ -336,8 +336,8 @@ export function UsersTable({ users }: { users: any[] }) {
       {/* CREATE MODAL */}
       {isCreateOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
-            <header className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="bg-green-100/50 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-green-200 flex flex-col max-h-[90vh]">
+            <header className="p-6 border-b border-green-200 flex justify-between items-center bg-slate-50">
               <div className="flex items-center gap-2 text-green-600">
                 <Sparkles className="w-5 h-5" />
                 <h3 className="font-black text-slate-900 text-lg">Nouvel Utilisateur</h3>
@@ -368,7 +368,7 @@ export function UsersTable({ users }: { users: any[] }) {
                   name="email" 
                   required 
                   placeholder="Ex : client@mail.com"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                 />
               </div>
 
@@ -379,7 +379,7 @@ export function UsersTable({ users }: { users: any[] }) {
                   name="password" 
                   required 
                   placeholder="Minimum 6 caractères"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                 />
               </div>
 
@@ -389,7 +389,7 @@ export function UsersTable({ users }: { users: any[] }) {
                   <select 
                     name="role" 
                     required 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
+                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
                   >
                     <option value="client">Client</option>
                     <option value="agent">Agent</option>
@@ -404,7 +404,7 @@ export function UsersTable({ users }: { users: any[] }) {
                     type="tel" 
                     name="phone" 
                     placeholder="Ex : 677000000"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                   />
                 </div>
               </div>
@@ -415,11 +415,11 @@ export function UsersTable({ users }: { users: any[] }) {
                   type="text" 
                   name="repere_textuel" 
                   placeholder="Ex : Akwa, face boulangerie Z"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                 />
               </div>
 
-              <footer className="pt-4 border-t border-slate-100 flex gap-4">
+              <footer className="pt-4 border-t border-green-200 flex gap-4">
                 <button 
                   type="button" 
                   onClick={() => setIsCreateOpen(false)}
@@ -443,8 +443,8 @@ export function UsersTable({ users }: { users: any[] }) {
       {/* EDIT MODAL */}
       {editingUser && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
-            <header className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="bg-green-100/50 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-green-200 flex flex-col max-h-[90vh]">
+            <header className="p-6 border-b border-green-200 flex justify-between items-center bg-slate-50">
               <div>
                 <h3 className="font-black text-slate-900 text-lg">Modifier le Profil</h3>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">{editingUser.email}</p>
@@ -475,7 +475,7 @@ export function UsersTable({ users }: { users: any[] }) {
                     name="role" 
                     defaultValue={editingUser.role}
                     required 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
+                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
                   >
                     <option value="client">Client</option>
                     <option value="agent">Agent</option>
@@ -491,7 +491,7 @@ export function UsersTable({ users }: { users: any[] }) {
                     name="phone" 
                     defaultValue={editingUser.phone || ''}
                     placeholder="Ex : 677000000"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                   />
                 </div>
               </div>
@@ -503,11 +503,11 @@ export function UsersTable({ users }: { users: any[] }) {
                   name="repere_textuel" 
                   defaultValue={editingUser.repere_textuel || ''}
                   placeholder="Ex : Akwa, face boulangerie Z"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
                 />
               </div>
 
-              <footer className="pt-4 border-t border-slate-100 flex gap-4">
+              <footer className="pt-4 border-t border-green-200 flex gap-4">
                 <button 
                   type="button" 
                   onClick={() => setEditingUser(null)}
@@ -531,7 +531,7 @@ export function UsersTable({ users }: { users: any[] }) {
       {/* DELETE CONFIRM MODAL */}
       {deletingUser && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-100 p-6 space-y-6">
+          <div className="bg-green-100/50 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-green-200 p-6 space-y-6">
             <div className="flex items-center gap-3 text-red-600">
               <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 animate-pulse" />
@@ -544,7 +544,7 @@ export function UsersTable({ users }: { users: any[] }) {
 
             <div className="bg-red-50/50 p-4 rounded-2xl border border-red-100 text-sm font-medium text-slate-700 space-y-2">
               <p>Vous êtes sur le point de supprimer définitivement le compte :</p>
-              <p className="font-black text-slate-900 text-xs bg-white px-3 py-2 rounded-xl border border-slate-100 shadow-sm inline-block">
+              <p className="font-black text-slate-900 text-xs bg-green-100/50 px-3 py-2 rounded-xl border border-green-200 shadow-sm inline-block">
                 {deletingUser.email || deletingUser.phone}
               </p>
               <p className="text-red-700 text-xs">

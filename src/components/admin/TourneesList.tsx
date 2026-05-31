@@ -35,7 +35,7 @@ export function TourneesList() {
 
   if (selectedTournee) {
     return (
-      <div className="bg-white rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
+      <div className="bg-green-100/50 rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200">
         <button 
           onClick={() => setSelectedTournee(null)}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 font-bold transition-colors"
@@ -65,7 +65,7 @@ export function TourneesList() {
             
             <div className="grid gap-4">
               {tourneeDetails?.map((passage: any) => (
-                <div key={passage.id} className="p-4 border border-slate-100 rounded-2xl flex items-center justify-between hover:border-blue-200 transition-colors bg-slate-50/50">
+                <div key={passage.id} className="p-4 border border-green-200 rounded-2xl flex items-center justify-between hover:border-blue-200 transition-colors bg-slate-50/50">
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                       passage.status === 'valide' ? 'bg-green-100 text-green-600' : 
@@ -99,7 +99,7 @@ export function TourneesList() {
   }
 
   return (
-    <div className="bg-white rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
+    <div className="bg-green-100/50 rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
@@ -117,7 +117,7 @@ export function TourneesList() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 text-slate-900 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
+            className="pl-12 pr-4 py-3 bg-slate-50 border border-green-200 text-slate-900 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
           />
         </div>
       </div>
@@ -130,7 +130,7 @@ export function TourneesList() {
             <button
               key={t.id}
               onClick={() => handleSelectTournee(t.id)}
-              className="w-full p-5 border border-slate-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-300 hover:shadow-md transition-all group bg-white text-left"
+              className="w-full p-5 border border-green-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-300 hover:shadow-md transition-all group bg-white text-left"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-slate-50 text-slate-500 rounded-xl flex items-center justify-center group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
@@ -157,7 +157,7 @@ export function TourneesList() {
             </button>
           ))}
           {tournees.length === 0 && (
-            <div className="p-12 text-center text-slate-400 font-medium bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="p-12 text-center text-slate-400 font-medium bg-slate-50 rounded-2xl border border-green-200">
               Aucune tournée enregistrée pour cette date.
             </div>
           )}

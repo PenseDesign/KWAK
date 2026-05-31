@@ -98,7 +98,7 @@ function AdminPageContent() {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="p-3 bg-white text-slate-600 hover:text-green-600 rounded-xl border border-slate-200 transition-all hover:border-green-200 disabled:opacity-50"
+          className="p-3 bg-green-100/50 text-slate-600 hover:text-green-600 rounded-xl border border-green-300 transition-all hover:border-green-200 disabled:opacity-50"
           title="Rafraîchir"
         >
           {refreshing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
@@ -131,7 +131,7 @@ function AdminPageContent() {
         {currentTab === 'overview' && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center gap-5 relative overflow-hidden group">
+              <div className="bg-green-100/50 p-6 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 flex items-center gap-5 relative overflow-hidden group">
                 <div className="p-4 bg-green-50 text-green-600 rounded-2xl">
                   <Package className="w-8 h-8" />
                 </div>
@@ -141,7 +141,7 @@ function AdminPageContent() {
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center gap-5 relative overflow-hidden group">
+              <div className="bg-green-100/50 p-6 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 flex items-center gap-5 relative overflow-hidden group">
                 <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
                   <DollarSign className="w-8 h-8" />
                 </div>
@@ -155,7 +155,7 @@ function AdminPageContent() {
             <div className="grid lg:grid-cols-2 gap-8">
               <SignalementsList />
 
-              <div className="bg-white rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+              <div className="bg-green-100/50 rounded-2xl shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 overflow-hidden">
                 <div className="p-6 border-b border-slate-50 flex items-center gap-3">
                   <Activity className="w-6 h-6 text-slate-400" />
                   <h2 className="text-xl font-bold text-slate-900">Activités Récentes</h2>

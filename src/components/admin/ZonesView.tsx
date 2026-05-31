@@ -36,7 +36,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
   if (selectedZone) {
     return (
       <div className="space-y-6">
-        <div className="bg-white p-6 rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
+        <div className="bg-green-100/50 p-6 rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200">
           <button 
             onClick={() => setSelectedZone(null)}
             className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 font-bold transition-colors"
@@ -61,7 +61,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
           ) : (
             <div className="grid gap-4">
               {clients.map(client => (
-                <div key={client.id} className="p-4 border border-slate-100 rounded-2xl hover:border-blue-200 transition-colors bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div key={client.id} className="p-4 border border-green-200 rounded-2xl hover:border-blue-200 transition-colors bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <p className="font-bold text-slate-900">{client.repere_textuel}</p>
                     <p className="text-sm text-slate-500 font-medium">{client.phone}</p>
@@ -74,7 +74,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
                         value={newZoneName}
                         onChange={(e) => setNewZoneName(e.target.value)}
                         placeholder="Nouvelle zone..."
-                        className="px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 font-bold"
+                        className="px-3 py-2 border border-green-300 rounded-xl text-sm outline-none focus:border-blue-500 font-bold"
                       />
                       <button 
                         onClick={() => handleUpdateZone(client.id)}
@@ -96,7 +96,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
                         setEditingClient(client.id)
                         setNewZoneName(selectedZone)
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-100/50 border border-green-300 rounded-xl text-sm font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-colors"
                     >
                       <Edit3 className="w-4 h-4" /> Déplacer
                     </button>
@@ -117,7 +117,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 flex items-center justify-between">
+      <div className="bg-green-100/50 p-6 rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 flex items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-slate-900">Cartographie des Zones</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium">Répartition de vos clients par quartiers approximatifs.</p>
@@ -132,7 +132,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
           <button 
             key={idx} 
             onClick={() => handleZoneClick(zone.name)}
-            className="text-left bg-white rounded-3xl p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="text-left bg-green-100/50 rounded-3xl p-6 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 hover:border-blue-400 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500/50"
           >
             <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.06] transition-all duration-500">
                <MapPin className="w-24 h-24 text-blue-600" />
@@ -158,7 +158,7 @@ export function ZonesView({ zones }: { zones: any[] }) {
       </div>
 
       {zones.length === 0 && (
-        <div className="p-12 text-center bg-white rounded-[2rem] border border-slate-100 text-slate-400 font-medium shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
+        <div className="p-12 text-center bg-green-100/50 rounded-[2rem] border border-green-200 text-slate-400 font-medium shadow-[0_2px_20px_rgba(0,0,0,0.04)]">
           Aucune zone détectée. Vos clients n'ont pas encore renseigné d'adresse.
         </div>
       )}

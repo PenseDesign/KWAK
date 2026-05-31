@@ -40,7 +40,7 @@ export function SignalementsList() {
 
   if (signalements.length === 0) {
     return (
-      <div className="bg-white rounded-[2rem] p-12 text-center shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
+      <div className="bg-green-100/50 rounded-[2rem] p-12 text-center shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200">
         <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <CheckCircle2 className="w-8 h-8" />
         </div>
@@ -51,7 +51,7 @@ export function SignalementsList() {
   }
 
   return (
-    <div className="bg-white rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+    <div className="bg-green-100/50 rounded-[2rem] shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200 overflow-hidden">
       <div className="p-8 border-b border-slate-50 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-6 h-6 text-red-500" />
@@ -85,7 +85,7 @@ export function SignalementsList() {
                 </div>
               </div>
 
-              <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 flex items-start gap-3">
+              <div className="bg-slate-50/50 p-4 rounded-2xl border border-green-200 flex items-start gap-3">
                 <MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
                 <p className="text-sm text-slate-600 font-medium italic">
                   "{s.message}"

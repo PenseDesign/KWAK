@@ -54,7 +54,7 @@ export function CreateTournee() {
   }
 
   return (
-    <div className="bg-white rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-slate-100">
+    <div className="bg-green-100/50 rounded-[2rem] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-green-200">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center">
           <Truck className="w-6 h-6" />
@@ -79,7 +79,7 @@ export function CreateTournee() {
                 required
                 value={selectedAgent}
                 onChange={(e) => setSelectedAgent(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 text-slate-900 rounded-2xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all font-medium appearance-none"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-green-200 text-slate-900 rounded-2xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all font-medium appearance-none"
               >
                 <option value="">Sélectionner un agent...</option>
                 {agents.map((agent) => (
@@ -103,7 +103,7 @@ export function CreateTournee() {
                 required
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 text-slate-900 rounded-2xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all font-medium"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-green-200 text-slate-900 rounded-2xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none transition-all font-medium"
               />
             </div>
           </div>
