@@ -54,7 +54,7 @@ const FORFAITS = [
     accentBg: 'bg-yellow-300/10',
     badge: 'Populaire',
     icon: <Star className="w-7 h-7" />,
-    highlight: '12 passages / mois',
+    highlight: '08 passages / mois',
     features: [
       '01 sacs poubelles / passage',
       '02 ramassages par semaine',
@@ -77,7 +77,7 @@ const FORFAITS = [
     icon: <Zap className="w-7 h-7" />,
     highlight: 'Sans engagement',
     features: [
-      '2 sacs poubelles / passage',
+      '1 sacs poubelles / passage',
       '2 ramassages par semaine',
       'Renouvelable chaque semaine',
       'Sans engagement',

@@ -88,7 +88,7 @@ export default function DashboardContent() {
       <div className="bg-white border-b border-slate-100 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
+            <Image src="/logo.jpeg" alt="LePointCitoyen" width={40} height={40} className="rounded-xl" />
             <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
           </div>
           <div className="flex items-center gap-2">
