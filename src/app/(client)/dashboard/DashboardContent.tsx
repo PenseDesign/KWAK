@@ -8,7 +8,6 @@ import {
   Calendar,
   CheckCircle2,
   Loader2,
-  PackageX,
   LogOut,
   History,
   ArrowRight,
@@ -18,6 +17,9 @@ import {
   Sparkles,
   User,
   Info,
+  Clock,
+  CalendarDays,
+  Timer,
 } from 'lucide-react'
 import { createClient } from '../../../lib/supabase/client'
 import Image from 'next/image'
@@ -268,6 +270,11 @@ export default function DashboardContent() {
         {/* Right Column: Mini Info Cards */}
         <div className="space-y-6">
 
+          {/* Subscription Details Card */}
+          {abonnement && (
+            <SubscriptionCard abonnement={abonnement} />
+          )}
+
           {/* Jours de passage (seulement si actif) */}
           {abonnement?.status === 'actif' && (
             <JoursPassageSelector
@@ -318,23 +325,115 @@ export default function DashboardContent() {
   )
 }
 
-function Clock({ className, ...props }: any) {
+function SubscriptionCard({ abonnement }: { abonnement: any }) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const dateDebut = abonnement.date_debut ? new Date(abonnement.date_debut) : null
+  const dateFin = abonnement.date_fin ? new Date(abonnement.date_fin) : null
+
+  let joursRestants: number | null = null
+  let totalJours: number | null = null
+  let progressPct = 0
+
+  if (dateFin && dateDebut) {
+    const msRestant = dateFin.getTime() - today.getTime()
+    joursRestants = Math.max(0, Math.ceil(msRestant / (1000 * 60 * 60 * 24)))
+    totalJours = Math.ceil((dateFin.getTime() - dateDebut.getTime()) / (1000 * 60 * 60 * 24))
+    const joursEcoules = totalJours - joursRestants
+    progressPct = totalJours > 0 ? Math.min(100, Math.round((joursEcoules / totalJours) * 100)) : 100
+  }
+
+  const isExpired = abonnement.status !== 'actif' || (joursRestants !== null && joursRestants === 0)
+  const isUrgent = joursRestants !== null && joursRestants <= 5 && !isExpired
+
+  const badgeColor = isExpired
+    ? 'bg-red-100 text-red-700'
+    : isUrgent
+      ? 'bg-amber-100 text-amber-700'
+      : 'bg-green-100 text-green-700'
+
+  const barColor = isExpired
+    ? 'bg-red-500'
+    : isUrgent
+      ? 'bg-amber-500'
+      : 'bg-green-500'
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
+    <div className="bg-white rounded-[2.5rem] p-7 shadow-sm border border-slate-100 space-y-5 overflow-hidden relative">
+      {/* Background icon */}
+      <div className="absolute -right-4 -top-4 opacity-[0.04]">
+        <CreditCard className="w-32 h-32 text-slate-900" />
+      </div>
+
+      <div className="flex items-center gap-3 relative z-10">
+        <div className="w-11 h-11 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center">
+          <CreditCard className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Mon Abonnement</p>
+          <p className="font-black text-slate-900 leading-tight">{abonnement.type_forfait || '—'}</p>
+        </div>
+      </div>
+
+      {/* Days remaining badge */}
+      {joursRestants !== null && (
+        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black ${badgeColor}`}>
+          <Timer className="w-4 h-4" />
+          {isExpired
+            ? 'Abonnement expiré'
+            : joursRestants === 0
+              ? 'Expire aujourd\'hui'
+              : `${joursRestants} jour${joursRestants > 1 ? 's' : ''} restant${joursRestants > 1 ? 's' : ''}`}
+        </div>
+      )}
+
+      {/* Progress bar */}
+      {totalJours !== null && !isExpired && (
+        <div className="space-y-1.5">
+          <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+            <div
+              className={`h-2.5 rounded-full transition-all duration-700 ${barColor}`}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <p className="text-xs text-slate-400 font-medium text-right">{progressPct}% écoulé</p>
+        </div>
+      )}
+
+      {/* Dates */}
+      <div className="grid grid-cols-2 gap-3 pt-1">
+        <div className="bg-slate-50 rounded-2xl p-3 space-y-0.5">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-wide flex items-center gap-1">
+            <CalendarDays className="w-3 h-3" /> Début
+          </p>
+          <p className="text-sm font-black text-slate-800">
+            {dateDebut ? dateDebut.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '—'}
+          </p>
+        </div>
+        <div className="bg-slate-50 rounded-2xl p-3 space-y-0.5">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-wide flex items-center gap-1">
+            <Clock className="w-3 h-3" /> Fin
+          </p>
+          <p className={`text-sm font-black ${isExpired ? 'text-red-600' : isUrgent ? 'text-amber-600' : 'text-slate-800'}`}>
+            {dateFin ? dateFin.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+          </p>
+        </div>
+      </div>
+
+      {/* Renew CTA if expired or urgent */}
+      {(isExpired || isUrgent) && (
+        <a
+          href="/subscribe"
+          className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-colors ${isExpired
+              ? 'bg-red-600 hover:bg-red-700 text-white'
+              : 'bg-amber-500 hover:bg-amber-600 text-white'
+            }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          {isExpired ? 'Renouveler maintenant' : 'Renouveler bientôt'}
+        </a>
+      )}
+    </div>
   )
 }

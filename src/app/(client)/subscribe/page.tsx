@@ -86,8 +86,8 @@ const FORFAITS = [
 ]
 
 const OPERATEURS = [
-  { id: 'mtn', label: 'MTN MoMo', color: 'bg-yellow-400 text-yellow-900', number: '677 00 00 00', logo: '📶' },
-  { id: 'orange', label: 'Orange Money', color: 'bg-orange-500 text-white', number: '655 00 00 00', logo: '🟠' },
+  { id: 'mtn', label: 'MTN MoMo', color: 'bg-yellow-400 text-yellow-900', number: '651 15 62 33', logo: '📶' },
+  { id: 'orange', label: 'Orange Money', color: 'bg-orange-500 text-white', number: '689 01 18 89', logo: '🟠' },
 ]
 
 export default function SubscribePage() {
