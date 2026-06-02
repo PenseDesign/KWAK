@@ -39,9 +39,9 @@ export default function RegisterPage() {
           <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
             <Mail className="w-10 h-10" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900">Vérifiez vos e-mails</h2>
+          <h2 className="text-3xl font-black text-slate-900">Votre compte a été créé avec succès !</h2>
           <p className="text-slate-500 font-medium leading-relaxed">
-            Un lien de confirmation a été envoyé à votre adresse e-mail. Veuillez cliquer dessus pour activer votre compte.
+            Bienvenue sur la plateforme LEPOINCITOYEN.
           </p>
           <Link href="/login" className="inline-block text-green-600 font-bold hover:underline">
             Retour à la connexion

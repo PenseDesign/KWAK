@@ -177,7 +177,7 @@ export default function DashboardContent() {
               <div className="space-y-1">
                 <p className="font-black text-blue-900 text-lg">Demande envoyée avec succès !</p>
                 <p className="text-blue-700 text-sm font-medium">
-                  Votre abonnement sera activé dans les <strong>24h</strong> après vérification du paiement.
+                  Votre abonnement sera activé dans les <strong>8h</strong> après vérification du paiement.
                 </p>
               </div>
             </div>
