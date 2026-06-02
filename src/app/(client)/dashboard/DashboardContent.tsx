@@ -426,8 +426,8 @@ function SubscriptionCard({ abonnement }: { abonnement: any }) {
         <a
           href="/subscribe"
           className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-colors ${isExpired
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-amber-500 hover:bg-amber-600 text-white'
+            ? 'bg-red-600 hover:bg-red-700 text-white'
+            : 'bg-amber-500 hover:bg-amber-600 text-white'
             }`}
         >
           <Sparkles className="w-4 h-4" />

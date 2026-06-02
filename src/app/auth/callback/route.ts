@@ -10,20 +10,20 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient()
     const { error, data } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (!error && data.user) {
-        // Récupérer le rôle pour rediriger au bon endroit
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', data.user.id)
-            .single()
 
-        if (profile?.role === 'admin') return NextResponse.redirect(`${origin}/admin`)
-        if (profile?.role === 'agent') return NextResponse.redirect(`${origin}/agent`)
-        if (profile?.role === 'pending_agent') return NextResponse.redirect(`${origin}/agent/pending`)
-        
-        return NextResponse.redirect(`${origin}/dashboard`)
+    if (!error && data.user) {
+      // Récupérer le rôle pour rediriger au bon endroit
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profile?.role === 'admin') return NextResponse.redirect(`${origin}/admin`)
+      if (profile?.role === 'agent') return NextResponse.redirect(`${origin}/agent`)
+      if (profile?.role === 'pending_agent') return NextResponse.redirect(`${origin}/agent/pending`)
+
+      return NextResponse.redirect(`${origin}/dashboard`)
     }
   }
 
