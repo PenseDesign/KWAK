@@ -454,7 +454,7 @@ export default function SubscribePage() {
                     type="text"
                     required
                     defaultValue={userProfile?.repere_textuel || ''}
-                    placeholder="Ex : Akwa, face Boulangerie Z, Portail Vert"
+                    placeholder="Ex : yassa, centrale thermique, Portail Vert"
                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
                   />
                 </div>
