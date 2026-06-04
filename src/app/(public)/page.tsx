@@ -146,7 +146,7 @@ export default function LandingPage() {
             {[
               { value: '500+', label: 'Ménages desservis', icon: Users },
               { value: '15+', label: 'Agents déployés', icon: Truck },
-              { value: '5', label: 'Secteurs couverts', icon: MapPin },
+              { value: '5', label: 'Quartiers couverts', icon: MapPin },
               { value: '98%', label: 'Taux de satisfaction', icon: Award },
             ].map((stat, i) => (
               <div key={i} className="text-center space-y-3">
