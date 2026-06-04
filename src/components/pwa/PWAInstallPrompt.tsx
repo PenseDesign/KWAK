@@ -9,35 +9,54 @@ export function PWAInstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    console.log('🔍 PWA Debug: Checking install prompt support...');
+    
     const handler = (e: Event) => {
+      console.log('✅ beforeinstallprompt event fired!');
       e.preventDefault();
       setDeferredPrompt(e);
       setShowPrompt(true);
+      console.log('📋 Install prompt is ready to show');
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
     // Check if app is already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    console.log('📋 Is standalone mode:', isStandalone);
     setIsInstalled(isStandalone);
     if (isStandalone) {
       setShowPrompt(false);
+      console.log('✅ App is already installed');
     }
+
+    // Log PWA criteria
+    console.log('🔍 PWA Debug: Checking installation criteria...');
+    console.log('📋 Protocol:', window.location.protocol);
+    console.log('📋 User agent:', navigator.userAgent);
+    console.log('📋 Is HTTPS:', window.location.protocol === 'https:');
+    console.log('📋 Is localhost:', window.location.hostname === 'localhost');
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    console.log('🔍 PWA Debug: Install button clicked');
+    
+    if (!deferredPrompt) {
+      console.error('❌ No deferred prompt available');
+      return;
+    }
 
+    console.log('📋 Showing install prompt...');
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     
     if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
+      console.log('✅ User accepted the install prompt');
       setIsInstalled(true);
     } else {
-      console.log('User dismissed the install prompt');
+      console.log('❌ User dismissed the install prompt');
     }
     
     setDeferredPrompt(null);
@@ -45,6 +64,7 @@ export function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
+    console.log('📋 User dismissed the install button');
     setShowPrompt(false);
     localStorage.setItem('pwa-install-dismissed', 'true');
   };
@@ -53,6 +73,7 @@ export function PWAInstallPrompt() {
     const dismissed = localStorage.getItem('pwa-install-dismissed');
     if (dismissed === 'true') {
       setShowPrompt(false);
+      console.log('📋 Install prompt was previously dismissed');
     }
   }, []);
 
