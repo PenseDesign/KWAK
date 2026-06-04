@@ -312,7 +312,7 @@ export default function DashboardContent() {
                 Notre support client est disponible pour vous aider avec votre abonnement.
               </p>
             </div>
-            <a href="tel:+237600000000" className="w-full bg-white text-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
+            <a href="tel:+237691691945" className="w-full bg-white text-green-600 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-50 transition-colors">
               <Phone className="w-5 h-5" />
               Contacter le support
             </a>
