@@ -49,60 +49,59 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+      <section className="pt-28 pb-16 md:pt-40 md:pb-24 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-bold border border-green-100 animate-fade-in">
-                <span className="relative flex h-2 w-2">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-7 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-semibold border border-green-100">
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
                 </span>
                 Précollecte et valorisation responsable
               </div>
-              <h1 className="text-5xl md:text-7xl font-black tracking-tight text-slate-900 leading-[1.1]">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
                 Vos déchets ne sont plus <span className="text-green-600">votre souci.</span>
               </h1>
-              <p className="text-xl text-slate-500 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-lg text-slate-500 font-normal max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 LEPOINCITOYEN connecte les ménages aux agents de collecte via une plateforme intelligente, transparente et écologique. Suivez votre ramassage en temps réel.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link href="/login" className="px-8 py-5 bg-green-600 text-white rounded-[2rem] font-black text-lg shadow-2xl shadow-green-200 hover:bg-green-500 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link href="/login" className="px-6 py-3.5 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
                   Inscrivez votre ménage
-                  <ArrowRight className="w-6 h-6" />
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
-                <Link href="/login" className="px-8 py-5 bg-slate-50 text-slate-900 border border-slate-200 rounded-[2rem] font-black text-lg hover:bg-white transition-all active:scale-95 flex items-center justify-center gap-2">
+                <Link href="/login" className="px-6 py-3.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                   Devenir Agent Collecteur
                 </Link>
               </div>
             </div>
             <div className="relative lg:ml-10">
-              <div className="absolute -inset-4 bg-green-200/30 rounded-[3rem] blur-3xl -z-10"></div>
-              <div className="relative bg-white p-3 rounded-[3rem] shadow-2xl shadow-slate-200 rotate-1">
+              <div className="absolute -inset-2 bg-green-100/40 rounded-2xl -z-10"></div>
+              <div className="relative bg-white p-2 rounded-2xl shadow-lg shadow-slate-200/80 border border-slate-100">
                 <Image
                   src="/hero.png"
                   alt="Agents LEPOINCITOYEN sur le terrain à Douala"
                   width={600}
                   height={600}
-                  className="rounded-[2.5rem] w-full h-auto object-cover"
+                  className="rounded-xl w-full h-auto object-cover"
                   priority
                 />
               </div>
               {/* Floating badge */}
-              <div className="absolute -bottom-4 -left-4 bg-white px-5 py-3 rounded-2xl shadow-xl border border-slate-100 flex items-center gap-3 animate-bounce-slow">
-                <div className="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
-                  <Award className="w-5 h-5" />
+              <div className="absolute -bottom-4 -left-4 bg-white px-4 py-2.5 rounded-xl shadow-md border border-slate-100 flex items-center gap-2.5">
+                <div className="w-8 h-8 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+                  <Award className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-900">Service Certifié CUD</p>
-                  <p className="text-[10px] font-bold text-slate-400">Douala, Cameroun</p>
+                  <p className="text-xs font-semibold text-slate-900">Service Certifié CUD</p>
+                  <p className="text-[10px] text-slate-400">Douala, Cameroun</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
       {/* Services Section */}
       <section id="services" className="py-24 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
