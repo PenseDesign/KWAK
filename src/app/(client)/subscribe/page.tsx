@@ -1,19 +1,28 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
-import { createDemandeAbonnement } from '../../actions'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createDemandeAbonnementDraft } from '../../actions'
 import { createClient } from '../../../lib/supabase/client'
+
+// ─── [USSD MODE ACTIF] ──────────────────────────────────────────────────────
+// Solution temporaire en attendant les credentials API Campay production.
+// Pour réactiver Campay : décommenter l'import ci-dessous et remplacer
+// USSDPaymentFlow par MobileMoneyPaymentForm dans le JSX.
+//
+// TODO: import { MobileMoneyPaymentForm, type PaymentFormData } from '@/components/payment/MobileMoneyPaymentForm'
+import { USSDPaymentFlow, type USSDPaymentData } from '@/components/payment/USSDPaymentFlow'
+// ─────────────────────────────────────────────────────────────────────────────
+
 import Image from 'next/image'
 import {
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  Smartphone,
   Loader2,
   Zap,
   Star,
   Calendar,
-  ShieldCheck,
   Home,
   Phone,
   MapPin,
@@ -85,17 +94,12 @@ const FORFAITS = [
   },
 ]
 
-const OPERATEURS = [
-  { id: 'mtn', label: 'MTN MoMo', color: 'bg-yellow-400 text-yellow-900', number: '651 15 62 33', logo: '📶' },
-  { id: 'orange', label: 'Orange Money', color: 'bg-orange-500 text-white', number: '689 01 18 89', logo: '🟠' },
-]
-
 export default function SubscribePage() {
+  const router = useRouter()
   const [step, setStep] = useState<'forfait' | 'paiement' | 'confirmation' | 'profile'>('forfait')
   const [selectedForfait, setSelectedForfait] = useState<typeof FORFAITS[0] | null>(null)
-  const [selectedOperateur, setSelectedOperateur] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [gpsLoading, setGpsLoading] = useState(false)
@@ -144,7 +148,7 @@ export default function SubscribePage() {
 
   const handleSelectForfait = (forfait: typeof FORFAITS[0]) => {
     // Vérifier si le profil est complet avant de continuer
-    const isProfileComplete = userProfile?.phone && userProfile?.repere_textuel
+    const isProfileComplete = userProfile?.phone && userProfile?.repere_textuel && userProfile?.full_name && userProfile?.quartier && userProfile?.coords_gps
     if (!isProfileComplete) {
       setStep('profile')
       setSelectedForfait(forfait)
@@ -154,31 +158,78 @@ export default function SubscribePage() {
     setStep('paiement')
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError(null)
-    const formData = new FormData(e.currentTarget)
-    startTransition(async () => {
-      const result = await createDemandeAbonnement(formData)
-      if (result && !result.success) {
-        setError(result.error ?? 'Erreur inconnue')
-      }
-    })
+  // ─── [USSD MODE] Handler paiement par code USSD ──────────────────────────────
+  // Enregistre la demande avec l'ID de transaction saisi par le client.
+  // L'admin valide ensuite manuellement depuis le dashboard.
+  //
+  // TODO: Remplacer par handleCampayPaymentSubmit() quand API Campay disponible.
+  const handleUSSDPaymentSubmit = async (data: USSDPaymentData) => {
+    if (!selectedForfait) {
+      throw new Error('Veuillez sélectionner un forfait avant de payer.')
+    }
+
+    const formData = new FormData()
+    formData.append('type_forfait', selectedForfait.id)
+    formData.append('operateur', data.operator)
+    formData.append('phone_payment', data.phone_number)
+    formData.append('transaction_id_ussd', data.transaction_id)
+    formData.append('montant_declare', String(data.amount))
+
+    const result = await createDemandeAbonnementDraft(formData)
+    if (!result.success) {
+      throw new Error(result.error || 'Impossible de créer la demande d\'abonnement.')
+    }
+
+    router.push('/dashboard?subscribed=pending')
   }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /*
+  // ── [CAMPAY - TEMPORAIREMENT DÉSACTIVÉ] ──────────────────────────────────────
+  // Réactiver quand les credentials API Campay production sont disponibles.
+  // Remplacer aussi l'import USSDPaymentFlow par MobileMoneyPaymentForm.
+  const handleCampayPaymentSubmit = async (data: PaymentFormData) => {
+    if (!selectedForfait) throw new Error('Veuillez sélectionner un forfait.')
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) throw new Error('Session expirée. Veuillez vous reconnecter.')
+    const formData = new FormData()
+    formData.append('type_forfait', selectedForfait.id)
+    formData.append('operateur', data.operator)
+    formData.append('phone_payment', data.phone_number)
+    const draft = await createDemandeAbonnementDraft(formData)
+    if (!draft.success || !draft.demandeId) throw new Error(draft.error || 'Erreur création demande.')
+    const response = await fetch('/api/campay/initiate-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ phone_number: data.phone_number, operator: data.operator, amount: selectedForfait.price + 139, demande_abonnement_id: draft.demandeId }),
+    })
+    const result = await response.json()
+    if (!response.ok) throw new Error(result.error || 'Erreur Campay.')
+    setPaymentMessage('Paiement initié, confirmez la transaction sur votre téléphone.')
+    return { reference: result.reference, transactionId: result.transaction_id || result.campaign_id || '', operator: data.operator, phone_number: data.phone_number }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+  */
+
 
   const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
     const phone = formData.get('phone') as string
     const repere_textuel = formData.get('repere_textuel') as string
+    const full_name = formData.get('full_name') as string
+    const quartier = formData.get('quartier') as string
     const lat = formData.get('lat') as string
     const lng = formData.get('lng') as string
 
-    const supabase = createClient()
-    const updates: Record<string, unknown> = { phone, repere_textuel }
-    if (lat && lng) {
-      updates.coords_gps = { lat: parseFloat(lat), lng: parseFloat(lng) }
+    if (!lat || !lng) {
+      setError('Vous devez capturer votre position GPS pour continuer.')
+      return
     }
+
+    const supabase = createClient()
+    const updates: Record<string, unknown> = { phone, repere_textuel, full_name, quartier, coords_gps: { lat: parseFloat(lat), lng: parseFloat(lng) } }
 
     const { error } = await supabase
       .from('profiles')
@@ -186,7 +237,7 @@ export default function SubscribePage() {
       .eq('id', userProfile?.id)
 
     if (!error) {
-      setUserProfile({ ...userProfile, phone, repere_textuel })
+      setUserProfile({ ...userProfile, phone, repere_textuel, full_name, quartier, coords_gps: { lat: parseFloat(lat), lng: parseFloat(lng) } })
       setStep('paiement')
     } else {
       setError('Erreur lors de la mise à jour du profil.')
@@ -220,7 +271,7 @@ export default function SubscribePage() {
         <div className="flex items-center gap-3 mb-10 justify-center">
           {(() => {
             const stepsList = ['forfait']
-            const needsProfile = !userProfile?.phone || !userProfile?.repere_textuel
+            const needsProfile = !userProfile?.phone || !userProfile?.repere_textuel || !userProfile?.full_name || !userProfile?.quartier || !userProfile?.coords_gps
             if (needsProfile || step === 'profile') {
               stepsList.push('profile')
             }
@@ -306,7 +357,7 @@ export default function SubscribePage() {
 
         {/* STEP 2 — Payment */}
         {step === 'paiement' && selectedForfait && (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             <div className="text-center mb-8 space-y-2">
               <h1 className="text-4xl font-black text-slate-900">Paiement Mobile</h1>
               <p className="text-slate-500 font-medium">
@@ -315,8 +366,6 @@ export default function SubscribePage() {
               </p>
             </div>
 
-            <input type="hidden" name="type_forfait" value={selectedForfait.id} />
-
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 text-red-600 text-sm font-medium rounded-2xl flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
@@ -324,100 +373,31 @@ export default function SubscribePage() {
               </div>
             )}
 
-            {/* Operator selection */}
-            <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 space-y-5">
-              <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-slate-400" />
-                <h3 className="font-black text-slate-900 text-lg">Choisissez votre opérateur</h3>
-              </div>
+            {/* ─── [USSD MODE ACTIF] ─────────────────────────────────────────────── */}
+            {/* TODO: Remplacer par <MobileMoneyPaymentForm> quand Campay API dispo  */}
+            <USSDPaymentFlow
+              amount={selectedForfait.price}
+              forfaitLabel={selectedForfait.label}
+              onSubmit={handleUSSDPaymentSubmit}
+              onError={(message) => setError(message)}
+            />
+            {/* ─────────────────────────────────────────────────────────────────── */}
 
-              <div className="grid grid-cols-2 gap-4">
-                {OPERATEURS.map((op) => (
-                  <label
-                    key={op.id}
-                    id={`operateur-${op.id}`}
-                    className={`cursor-pointer rounded-2xl border-2 p-5 flex flex-col items-center gap-3 transition-all
-                      ${selectedOperateur === op.id ? 'border-green-600 bg-green-50' : 'border-slate-100 hover:border-slate-300'}`}
-                  >
-                    <input
-                      type="radio"
-                      name="operateur"
-                      value={op.id}
-                      required
-                      className="sr-only"
-                      onChange={() => setSelectedOperateur(op.id)}
-                    />
-                    <span className="text-4xl">{op.logo}</span>
-                    <div className="text-center">
-                      <p className="font-black text-slate-900">{op.label}</p>
-                      <p className="text-xs text-slate-400 font-medium mt-0.5">Mobile Money</p>
-                    </div>
-                    {selectedOperateur === op.id && (
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    )}
-                  </label>
-                ))}
-              </div>
+            {/*
+            [CAMPAY - TEMPORAIREMENT DÉSACTIVÉ]
+            <MobileMoneyPaymentForm
+              amount={selectedForfait.price}
+              customDescription={`Payer ${(selectedForfait.price + 139).toLocaleString()} FCFA`}
+              onSubmit={handleCampayPaymentSubmit}
+              onError={(message) => setError(message)}
+              onSuccess={() => setError(null)}
+            />
+            */}
+
+            <div className="text-center text-xs text-slate-400 font-medium px-4">
+              Votre abonnement sera activé dans les 2h après vérification de votre paiement.
             </div>
-
-            {/* Payment instructions */}
-            {selectedOperateur && (
-              <div className={`rounded-[2rem] p-7 space-y-4 ${selectedOperateur === 'mtn'
-                ? 'bg-yellow-50 border border-yellow-200'
-                : 'bg-orange-50 border border-orange-200'
-                }`}>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className={`w-5 h-5 ${selectedOperateur === 'mtn' ? 'text-yellow-700' : 'text-orange-700'}`} />
-                  <h3 className={`font-black text-lg ${selectedOperateur === 'mtn' ? 'text-yellow-900' : 'text-orange-900'}`}>
-                    Instructions de paiement
-                  </h3>
-                </div>
-                <div className={`space-y-2 text-sm font-medium ${selectedOperateur === 'mtn' ? 'text-yellow-800' : 'text-orange-800'}`}>
-                  <p>1. Ouvrez votre app <strong>{selectedOperateur === 'mtn' ? 'MTN MoMo' : 'Orange Money'}</strong></p>
-                  <p>2. Envoyez <strong>{selectedForfait.price.toLocaleString()} FCFA</strong> au numéro :</p>
-                  <div className={`text-2xl font-black tracking-wider py-3 px-5 rounded-2xl ${selectedOperateur === 'mtn' ? 'bg-yellow-200 text-yellow-900' : 'bg-orange-200 text-orange-900'
-                    }`}>
-                    {OPERATEURS.find(o => o.id === selectedOperateur)?.number}
-                  </div>
-                  <p>3. Dans le motif, indiquez : <strong>LPC - {selectedForfait.label}</strong></p>
-                  <p>4. Entrez votre numéro de téléphone ci-dessous et soumettez la demande.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Phone number */}
-            <div className="bg-white rounded-[2rem] p-7 shadow-sm border border-slate-100 space-y-4">
-              <h3 className="font-black text-slate-900 text-lg">Votre numéro de paiement</h3>
-              <p className="text-sm text-slate-500 font-medium">Entrez le numéro depuis lequel vous avez effectué le paiement.</p>
-              <input
-                name="phone_payment"
-                type="tel"
-                required
-                placeholder="Ex : 677 00 00 00"
-                className="block w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 transition-all font-medium text-lg tracking-wider"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isPending || !selectedOperateur}
-              id="submit-demande"
-              className="w-full bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50 shadow-xl shadow-slate-200"
-            >
-              {isPending ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
-              ) : (
-                <>
-                  J'ai effectué le paiement — Soumettre
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-
-            <p className="text-center text-xs text-slate-400 font-medium px-4">
-              Votre abonnement sera activé dans les <strong>24h</strong> après vérification par notre équipe.
-            </p>
-          </form>
+          </div>
         )}
 
         {/* STEP — Complete profile */}
@@ -447,14 +427,42 @@ export default function SubscribePage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
-                    Adresse / Quartier / Repères (Obligatoire)
+                    Nom Complet (Obligatoire)
+                  </label>
+                  <input
+                    name="full_name"
+                    type="text"
+                    required
+                    defaultValue={userProfile?.full_name || ''}
+                    placeholder="Ex: Jean Dupont"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                    Quartier (Obligatoire)
+                  </label>
+                  <input
+                    name="quartier"
+                    type="text"
+                    required
+                    defaultValue={userProfile?.quartier || ''}
+                    placeholder="Ex: Akwa, Bonanjo..."
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                    Adresse Détaillée / Repères (Obligatoire)
                   </label>
                   <input
                     name="repere_textuel"
                     type="text"
                     required
                     defaultValue={userProfile?.repere_textuel || ''}
-                    placeholder="Ex : yassa, centrale thermique, Portail  Vert"
+                    placeholder="Ex : face Boulangerie Z, Portail Vert"
                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium text-slate-900"
                   />
                 </div>
@@ -484,12 +492,12 @@ export default function SubscribePage() {
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-blue-500" />
                   <h3 className="font-black text-slate-900 text-lg">Position GPS</h3>
-                  <span className="text-[10px] font-black bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase">Recommandé</span>
+                  <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase">Obligatoire</span>
                 </div>
               </div>
 
               <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                Le GPS permet à notre agent de localiser précisément votre domicile sur sa carte de collecte.
+                Le GPS est obligatoire. Il permet à notre agent de localiser précisément votre domicile sur sa carte de collecte.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center gap-4">

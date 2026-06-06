@@ -108,6 +108,22 @@ export default function RegisterPage() {
 
             <div className="space-y-4">
               <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 ml-1">Nom complet</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-green-600 transition-colors">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <input
+                    name="full_name"
+                    type="text"
+                    required
+                    className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 transition-all"
+                    placeholder="Jean Dupont"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 ml-1">Numéro de téléphone</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-green-600 transition-colors">

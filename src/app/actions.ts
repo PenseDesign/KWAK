@@ -295,6 +295,7 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string
   const role = formData.get('role') as string // 'client' ou 'pending_agent'
   const phone = formData.get('phone') as string
+  const full_name = formData.get('full_name') as string
   
   const supabase = await createClient()
 
@@ -306,10 +307,10 @@ export async function signUp(formData: FormData) {
   if (error) return { success: false, error: error.message }
 
   if (data.user) {
-    // Créer le profil avec le bon rôle et le numéro de téléphone
+    // Créer le profil avec le bon rôle, le numéro de téléphone et le nom
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert({ id: data.user.id, role, phone }) 
+      .upsert({ id: data.user.id, role, phone, full_name }) 
 
     if (profileError) console.error("Error updating profile:", profileError)
   }
@@ -369,12 +370,12 @@ export async function createDemandeAbonnement(formData: FormData) {
   // Vérifier si le profil est complet avant de créer l'abonnement
   const { data: profile } = await supabase
     .from('profiles')
-    .select('phone, repere_textuel')
+    .select('phone, repere_textuel, full_name, quartier, coords_gps')
     .eq('id', user.id)
     .single()
 
-  if (!profile || !profile.phone || !profile.repere_textuel) {
-    return { success: false, error: 'Votre profil doit être complet (téléphone et adresse de collecte) avant de souscrire.' }
+  if (!profile || !profile.phone || !profile.repere_textuel || !profile.full_name || !profile.quartier || !profile.coords_gps) {
+    return { success: false, error: 'Votre profil doit être complet (nom, téléphone, adresse, quartier et position GPS) avant de souscrire.' }
   }
 
   // Check if already has a pending or active demand
@@ -404,6 +405,73 @@ export async function createDemandeAbonnement(formData: FormData) {
   redirect('/dashboard?subscribed=pending')
 }
 
+export async function createDemandeAbonnementDraft(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+
+  const typeForfait = formData.get('type_forfait') as string
+  const operateur = formData.get('operateur') as string
+  const phonePayment = formData.get('phone_payment') as string
+
+  if (!typeForfait || !operateur || !phonePayment) {
+    return { success: false, error: 'Tous les champs de paiement sont requis.' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('phone, repere_textuel, full_name, quartier, coords_gps')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !profile.phone || !profile.repere_textuel || !profile.full_name || !profile.quartier || !profile.coords_gps) {
+    return { success: false, error: 'Votre profil doit être complet (nom, téléphone, adresse, quartier et position GPS) avant de souscrire.' }
+  }
+
+  const { data: existing } = await supabase
+    .from('demandes_abonnement')
+    .select('id, status')
+    .eq('client_id', user.id)
+    .in('status', ['en_attente', 'actif'])
+    .maybeSingle()
+
+  if (existing) {
+    return { success: false, error: 'Vous avez déjà une demande en cours ou un abonnement actif.' }
+  }
+
+  // ─── [USSD MODE] Champs supplémentaires pour la vérification admin ──────────
+  // transaction_id_ussd : ID de transaction saisi par le client depuis son SMS
+  // montant_declare     : Montant que le client déclare avoir envoyé
+  // Ces champs permettent à l'admin de croiser avec les SMS reçus sur son téléphone.
+  // TODO: Ces colonnes doivent exister dans Supabase (voir SQL ci-dessous) :
+  //   ALTER TABLE demandes_abonnement ADD COLUMN IF NOT EXISTS transaction_id_ussd TEXT;
+  //   ALTER TABLE demandes_abonnement ADD COLUMN IF NOT EXISTS montant_declare INTEGER;
+  const transactionIdUssd = formData.get('transaction_id_ussd') as string | null
+  const montantDeclare = formData.get('montant_declare') as string | null
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const { data, error } = await supabase
+    .from('demandes_abonnement')
+    .insert({
+      client_id: user.id,
+      type_forfait: typeForfait,
+      operateur_paiement: operateur,
+      phone_paiement: phonePayment,
+      status: 'en_attente',
+      // Champs USSD (optionnels — null si paiement Campay)
+      ...(transactionIdUssd ? { transaction_id_ussd: transactionIdUssd } : {}),
+      ...(montantDeclare ? { montant_declare: parseInt(montantDeclare, 10) } : {}),
+    })
+    .select('id')
+    .single()
+
+  if (error || !data) {
+    return { success: false, error: error?.message || 'Erreur lors de la création de la demande d’abonnement.' }
+  }
+
+  return { success: true, demandeId: data.id }
+}
+
 export async function activateAbonnement(demandeId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -431,9 +499,9 @@ export async function activateAbonnement(demandeId: string) {
 
   // Determine default pickup days
   // 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 0=Sun
-  let joursPassage = [1, 4] // Default: Mon, Thu
+  let joursPassage = [3, 6] // Default: Wed, Sat
   if (demande.type_forfait === 'Mensuel Pro') {
-    joursPassage = [1, 3, 5] // Pro: Mon, Wed, Fri
+    joursPassage = [3, 4, 6] // Pro: Wed, Thu, Sat
   }
 
   // Upsert the abonnement
@@ -472,10 +540,12 @@ export async function updateProfile(formData: FormData) {
 
   const repere_textuel = formData.get('repere_textuel') as string
   const phone = formData.get('phone') as string
+  const full_name = formData.get('full_name') as string
+  const quartier = formData.get('quartier') as string
   const lat = formData.get('lat') as string
   const lng = formData.get('lng') as string
 
-  const updates: Record<string, unknown> = { repere_textuel, phone }
+  const updates: Record<string, unknown> = { repere_textuel, phone, full_name, quartier }
   if (lat && lng) {
     updates.coords_gps = { lat: parseFloat(lat), lng: parseFloat(lng) }
   }
@@ -512,9 +582,9 @@ export async function updateJoursPassage(jours: number[]) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Non authentifié' }
 
-  // Vérifier qu'on est bien entre lundi (1) et jeudi (4)
-  const isValid = jours.every(j => j >= 1 && j <= 4)
-  if (!isValid) return { success: false, error: 'Les jours doivent être compris entre lundi et jeudi.' }
+  const allowedDays = [0, 3, 4, 6] // Dimanche, Mercredi, Jeudi, Samedi
+  const isValid = jours.every(j => allowedDays.includes(j))
+  if (!isValid) return { success: false, error: 'Les jours doivent être parmi Mercredi, Jeudi, Samedi ou Dimanche.' }
 
   const { error } = await supabase
     .from('abonnements')

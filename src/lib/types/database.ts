@@ -6,6 +6,7 @@ export type Profile = {
   photo_facade_url: string
   coords_gps: { lat: number; lng: number }
   full_name?: string
+  quartier?: string
 }
 
 export type Abonnement = {
@@ -39,4 +40,21 @@ export type Passage = {
 export type ClientMission = Profile & {
   passage_id: string
   passage_status: Passage['status']
+}
+
+export type PaymentTransaction = {
+  id: string
+  client_id: string
+  demande_abonnement_id?: string
+  phone_number: string
+  operator: 'mtn' | 'orange'
+  amount: number
+  currency: string
+  reference: string
+  campay_transaction_id?: string
+  status: 'pending' | 'processing' | 'successful' | 'failed' | 'cancelled'
+  error_message?: string
+  created_at: string
+  updated_at: string
+  completed_at?: string
 }

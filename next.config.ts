@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Allow connections from the local network IP
+  allowedDevOrigins: ['172.20.10.3'],
+
   // PWA Configuration
   async headers() {
     return [

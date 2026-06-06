@@ -264,7 +264,7 @@ export default function AgentPage() {
               {cachedTournee.map((mission, index) => {
                 const isCompleted = mission.passage_status === 'valide'
                 const gpsUrl = mission.coords_gps
-                  ? `https://www.google.com/maps/dir/?api=1&destination=${(mission.coords_gps as any).lat},${(mission.coords_gps as any).lng}`
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${mission.coords_gps.lat},${mission.coords_gps.lng}`
                   : null
 
                 return (

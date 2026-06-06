@@ -92,7 +92,10 @@ export default function ProfilPage() {
     const formData = new FormData(e.currentTarget)
     // Add GPS coordinates manually as they are in state
     if (profile?.lat) formData.append('lat', profile.lat.toString())
-    if (profile?.lng) formData.append('lng', profile.lng.toString())
+    if (!profile?.lat || !profile?.lng) {
+      setError('Vous devez capturer votre position GPS pour continuer.')
+      return
+    }
 
     startTransition(async () => {
       const res = await updateProfile(formData)
@@ -168,14 +171,42 @@ export default function ProfilPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
-                  Adresse / Quartier (Obligatoire)
+                  Nom Complet (Obligatoire)
+                </label>
+                <input
+                  name="full_name"
+                  type="text"
+                  required
+                  defaultValue={profile?.full_name || ''}
+                  placeholder="Ex : Jean Dupont"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                  Quartier (Obligatoire)
+                </label>
+                <input
+                  name="quartier"
+                  type="text"
+                  required
+                  defaultValue={profile?.quartier || ''}
+                  placeholder="Ex : Akwa, Bonanjo..."
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                  Adresse Détaillée / Repères (Obligatoire)
                 </label>
                 <input
                   name="repere_textuel"
                   type="text"
                   required
                   defaultValue={profile?.repere_textuel || ''}
-                  placeholder="Ex : Akwa, face Boulangerie Z, Portail Vert"
+                  placeholder="Ex : face Boulangerie Z, Portail Vert"
                   className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-green-600/20 focus:border-green-600 outline-none transition-all font-medium"
                 />
               </div>
@@ -199,18 +230,18 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          {/* Section: GPS (Optionnel) */}
+          {/* Section: GPS (Obligatoire) */}
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-500" />
                 <h2 className="font-black text-slate-900 text-lg">Position GPS</h2>
-                <span className="text-[10px] font-black bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full uppercase">Optionnel</span>
+                <span className="text-[10px] font-black bg-red-50 text-red-500 px-2 py-0.5 rounded-full uppercase">Obligatoire</span>
               </div>
             </div>
 
             <p className="text-sm text-slate-500 font-medium leading-relaxed">
-              Le GPS permet à l'agent de voir votre maison sur sa carte. Activez-le quand vous êtes chez vous.
+              Le GPS est obligatoire pour permettre à l'agent de localiser précisément votre domicile sur sa carte.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-4">

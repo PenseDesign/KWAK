@@ -1,8 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## 🚀 Démarrage rapide
 
-First, run the development server:
+Lancez le serveur de développement:
 
 ```bash
 npm run dev
@@ -14,11 +14,68 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur pour voir le résultat.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Vous pouvez modifier la page en éditant `app/page.tsx`. La page se met à jour automatiquement lors de la modification du fichier.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 💳 Intégration Campay (Mobile Money)
+
+Ce projet inclut une intégration complète pour le paiement par Mobile Money (MTN MoMo / Orange Money).
+
+### 📋 Documentation Campay
+
+- **[Démarrage rapide](docs/QUICK_START.md)** - Guide 5 minutes
+- **[Intégration complète](docs/CAMPAY_INTEGRATION.md)** - Documentation détaillée
+- **[Configuration webhook](docs/WEBHOOK_CONFIG.md)** - Setup webhook Campay
+- **[Exemple d'utilisation](docs/EXAMPLE_USAGE.tsx)** - Exemple de page
+- **[Statut du projet](CAMPAY_STATUS.md)** - Vue d'ensemble complète
+- **[Clés API à recevoir](CLÉS_API_À_RECEVOIR.md)** - Template config
+
+### 🔑 Configuration
+
+1. Obtenez vos clés de test : https://campay.net/dashboard
+2. Configurez `.env.local`:
+   ```bash
+   CAMPAY_APP_KEY=your_test_app_key
+   CAMPAY_SECRET_KEY=your_test_secret_key
+   CAMPAY_URL=https://api.sandbox.campay.net
+   ```
+3. Déployez la migration Supabase : `supabase/migrations/20260604_payment_transactions.sql`
+4. Testez : `npm run dev`
+
+### 🧪 Tester localement
+
+```bash
+# Vérifier que tout est configuré
+node scripts/verify-campay-setup.mjs
+
+# Voir les tests d'intégration
+node docs/TEST_INTEGRATION.mjs
+```
+
+### 📱 Composant Formulaire
+
+```tsx
+import { MobileMoneyPaymentForm } from '@/components/payment'
+
+export default function SubscribePage() {
+  return (
+    <MobileMoneyPaymentForm
+      amount={15000}
+      customDescription="Premium Plan - 1 month"
+      onSuccess={(data) => console.log('Payment started:', data)}
+      onError={(error) => console.log('Error:', error)}
+    />
+  )
+}
+```
+
+### 🛣️ API Routes
+
+- `POST /api/campay/initiate-payment` - Initialiser un paiement
+- `POST /api/campay/payment-webhook` - Webhook Campay
+
+---
 
 ## Learn More
 

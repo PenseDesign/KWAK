@@ -5,10 +5,10 @@ import { Calendar, Loader2, CheckCircle2 } from 'lucide-react'
 import { updateJoursPassage } from '../../app/actions'
 
 const DAYS = [
-  { id: 1, name: 'Lundi' },
-  { id: 2, name: 'Mardi' },
   { id: 3, name: 'Mercredi' },
-  { id: 4, name: 'Jeudi' }
+  { id: 4, name: 'Jeudi' },
+  { id: 6, name: 'Samedi' },
+  { id: 0, name: 'Dimanche' }
 ]
 
 export function JoursPassageSelector({ initialJours = [], typeForfait }: { initialJours: number[], typeForfait: string }) {
