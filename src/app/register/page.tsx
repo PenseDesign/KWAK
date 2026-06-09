@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { signUp } from '@/app/actions'
-import { Lock, Mail, Loader2, ArrowRight, User, Home, Truck, Phone } from 'lucide-react'
+import { Lock, Mail, Loader2, ArrowRight, User, Home, Truck, Phone, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -137,22 +137,9 @@ export default function RegisterPage() {
                     placeholder="6xx xxx xxx"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">E-mail</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-green-600 transition-colors">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 transition-all"
-                    placeholder="exemple@email.com"
-                  />
-                </div>
+                <p className="text-xs text-green-700 font-medium ml-1">
+                  ℹ️ Ce numéro servira à vous connecter
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -170,6 +157,29 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                   />
                 </div>
+              </div>
+
+              {/* Email — champ de sécurité, discret mais obligatoire */}
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <div className="flex items-center gap-2 ml-1">
+                  <ShieldCheck className="w-4 h-4 text-slate-400" />
+                  <label className="text-sm font-bold text-slate-500">Adresse e-mail <span className="font-normal text-slate-400">(pour la sécurité du compte)</span></label>
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-green-600 transition-colors">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    className="block w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 transition-all"
+                    placeholder="exemple@gmail.com"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 ml-1">
+                  🔒 Utilisé uniquement en cas de perte de mot de passe. Jamais partagé.
+                </p>
               </div>
             </div>
 

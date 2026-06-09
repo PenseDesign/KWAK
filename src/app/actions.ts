@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '../lib/supabase/server'
+import { createAdminClient } from '../lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { Passage, Tournee, ClientMission } from '../lib/types/database'
@@ -249,22 +250,35 @@ export async function getAdminStats() {
 }
 
 export async function signIn(formData: FormData) {
-  const login = formData.get('login') as string // Peut être email ou téléphone
+  const phone = formData.get('phone') as string // Numéro de téléphone saisi par l'utilisateur
   const password = formData.get('password') as string
-  const supabase = await createClient()
 
-  let authParams: any = { password }
-  if (login.includes('@')) {
-    authParams.email = login
-  } else {
-    authParams.phone = login
+  // ── Étape 1 : Retrouver l'email à partir du numéro de téléphone ──────────────
+  // On utilise le client admin (service role) pour lire la table profiles AVANT
+  // que l'utilisateur soit authentifié (RLS ne le permettrait pas avec le client anon).
+  const adminClient = createAdminClient()
+  const { data: profile, error: lookupError } = await adminClient
+    .from('profiles')
+    .select('email')
+    .eq('phone', phone)
+    .maybeSingle()
+
+  if (lookupError || !profile?.email) {
+    return { success: false, error: 'Aucun compte trouvé avec ce numéro de téléphone.' }
   }
+  // ─────────────────────────────────────────────────────────────────────────────
 
-  const { data, error } = await supabase.auth.signInWithPassword(authParams)
+  // ── Étape 2 : Authentification Supabase avec l'email retrouvé ────────────────
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: profile.email,
+    password,
+  })
 
   if (error) {
-    return { success: false, error: error.message }
+    return { success: false, error: 'Numéro de téléphone ou mot de passe incorrect.' }
   }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   const user = data.user
   if (user) {
@@ -296,6 +310,18 @@ export async function signUp(formData: FormData) {
   const role = formData.get('role') as string // 'client' ou 'pending_agent'
   const phone = formData.get('phone') as string
   const full_name = formData.get('full_name') as string
+
+  // Vérifier que le numéro de téléphone n'est pas déjà utilisé
+  const adminClient = createAdminClient()
+  const { data: existingPhone } = await adminClient
+    .from('profiles')
+    .select('id')
+    .eq('phone', phone)
+    .maybeSingle()
+
+  if (existingPhone) {
+    return { success: false, error: 'Ce numéro de téléphone est déjà associé à un compte.' }
+  }
   
   const supabase = await createClient()
 
@@ -307,12 +333,13 @@ export async function signUp(formData: FormData) {
   if (error) return { success: false, error: error.message }
 
   if (data.user) {
-    // Créer le profil avec le bon rôle, le numéro de téléphone et le nom
+    // Créer le profil avec le rôle, le téléphone, le nom et l'email
+    // L'email est stocké dans profiles pour permettre la connexion par téléphone
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert({ id: data.user.id, role, phone, full_name }) 
+      .upsert({ id: data.user.id, role, phone, full_name, email })
 
-    if (profileError) console.error("Error updating profile:", profileError)
+    if (profileError) console.error('Error updating profile:', profileError)
   }
 
   return { success: true }
