@@ -2,9 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { getAdminStats, getPendingAgents, getPendingAbonnements, getAllUsers, getZonesStats } from '../../actions'
+import { getAdminStats, getPendingAgents, getPendingAbonnements, getAllUsers, getZonesStats, signOut } from '../../actions'
 import { createClient } from '../../../lib/supabase/client'
-import { Activity, Users, DollarSign, Package, LayoutDashboard, Map, ClipboardCheck, RefreshCw } from 'lucide-react'
+import { Activity, Users, DollarSign, Package, LayoutDashboard, Map, ClipboardCheck, RefreshCw, LogOut } from 'lucide-react'
 import { PendingAgents } from '../../../components/admin/PendingAgents'
 import { PendingAbonnements } from '../../../components/admin/PendingAbonnements'
 import { CreateTournee } from '../../../components/admin/CreateTournee'
@@ -24,6 +24,8 @@ function AdminPageContent() {
   const [pendingAgents, setPendingAgents] = useState<any[]>([])
   const [pendingDemandes, setPendingDemandes] = useState<any[]>([])
   const [refreshing, setRefreshing] = useState(false)
+  const [adminProfile, setAdminProfile] = useState<{ full_name?: string; phone?: string } | null>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'overview'
@@ -55,8 +57,30 @@ function AdminPageContent() {
     }
   }
 
+  const fetchAdminProfile = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', user.id)
+        .single()
+      if (profile) setAdminProfile(profile)
+    } catch (e) {
+      console.error('[AdminPage] fetchAdminProfile Error:', e)
+    }
+  }
+
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    await signOut()
+  }
+
   useEffect(() => {
     fetchData()
+    fetchAdminProfile()
   }, [currentTab])
 
   // Rafraîchir automatiquement toutes les 30 secondes
@@ -90,19 +114,52 @@ function AdminPageContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 font-sans">
-      <header className="mb-8 flex justify-between items-start">
+      <header className="mb-8 flex justify-between items-center gap-4">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Tableau de Bord Admin</h1>
           <p className="text-slate-500 font-medium mt-1">Supervision globale LEPOINCITOYEN</p>
         </div>
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="p-3 bg-green-100/50 text-slate-600 hover:text-green-600 rounded-xl border border-green-300 transition-all hover:border-green-200 disabled:opacity-50"
-          title="Rafraîchir"
-        >
-          {refreshing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Identité de l'admin connecté */}
+          {adminProfile && (
+            <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-2.5 shadow-sm">
+              {/* Avatar initiales */}
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+                {adminProfile.full_name
+                  ? adminProfile.full_name.trim().split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
+                  : '?'}
+              </div>
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-slate-800 truncate max-w-[140px]">
+                  {adminProfile.full_name || 'Admin'}
+                </p>
+                <p className="text-xs text-slate-400 font-medium">{adminProfile.phone || ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Bouton Rafraîchir */}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="p-3 bg-green-100/50 text-slate-600 hover:text-green-600 rounded-xl border border-green-300 transition-all hover:border-green-200 disabled:opacity-50"
+            title="Rafraîchir"
+          >
+            {refreshing ? <Loader2 className="w-5 h-5 animate-spin" /> : <RefreshCw className="w-5 h-5" />}
+          </button>
+
+          {/* Bouton Déconnexion */}
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex items-center gap-2 px-4 py-3 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl border border-red-200 font-bold text-sm transition-all disabled:opacity-50"
+            title="Se déconnecter"
+          >
+            {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            <span className="hidden sm:inline">Déconnexion</span>
+          </button>
+        </div>
       </header>
 
       {/* Tabs Navigation */}

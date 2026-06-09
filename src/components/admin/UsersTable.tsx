@@ -221,7 +221,7 @@ export function UsersTable({ users }: { users: any[] }) {
                 <th className="px-6 py-4">Coordonnées</th>
                 <th className="px-6 py-4">Rôle</th>
                 <th className="px-6 py-4">Abonnement</th>
-                <th className="px-6 py-4">Ancienneté</th>
+                <th className="px-6 py-4">Dates clés</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -298,9 +298,26 @@ export function UsersTable({ users }: { users: any[] }) {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-bold ${aboStatus === 'never' ? 'text-red-500' : 'text-slate-500'}`}>
-                        {getRelativeTime(user.created_at)}
-                      </span>
+                      <div className="space-y-1.5">
+                        {/* Date d'inscription */}
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                          <Calendar className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                          <span className="text-slate-400 font-bold">Inscrit&nbsp;:</span>
+                          {user.created_at
+                            ? new Date(user.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+                            : <span className="italic text-slate-300">Inconnu</span>}
+                        </div>
+                        {/* Date d'abonnement */}
+                        {user.role === 'client' && (
+                          <div className="flex items-center gap-1.5 text-xs font-medium">
+                            <Clock className="w-3.5 h-3.5 shrink-0" style={{ color: aboStatus === 'active' ? '#16a34a' : aboStatus === 'suspended' ? '#dc2626' : '#94a3b8' }} />
+                            <span className="font-bold" style={{ color: aboStatus === 'active' ? '#16a34a' : aboStatus === 'suspended' ? '#dc2626' : '#94a3b8' }}>Abonné&nbsp;:</span>
+                            {user.abonnements?.[0]?.date_debut
+                              ? <span style={{ color: aboStatus === 'active' ? '#15803d' : aboStatus === 'suspended' ? '#b91c1c' : '#94a3b8' }}>{new Date(user.abonnements[0].date_debut).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                              : <span className="italic text-slate-300">Jamais abonné</span>}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
