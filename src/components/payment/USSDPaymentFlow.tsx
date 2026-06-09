@@ -35,7 +35,7 @@ const getMTNUSSDLink = (amount: number) =>
   `tel:*126*1*${MTN_PHONE}*${amount}%23`
 
 const getOrangeUSSDLink = (amount: number) =>
-  `tel:%23150*4*${amount}*${ORANGE_PHONE}%23`
+  `tel:%23150*1*${amount}*${ORANGE_PHONE}%23`
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export interface USSDPaymentData {
@@ -254,11 +254,10 @@ export function USSDPaymentFlow({
             {(['mtn', 'orange'] as const).map((op) => (
               <label
                 key={op}
-                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 cursor-pointer font-bold text-sm transition-all ${
-                  selectedOperator === op
+                className={`flex-1 flex items-center justify-center gap-2 p-4 rounded-xl border-2 cursor-pointer font-bold text-sm transition-all ${selectedOperator === op
                     ? 'border-green-600 bg-green-50 text-green-700'
                     : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -302,31 +301,27 @@ export function USSDPaymentFlow({
 
           {/* Résumé du destinataire */}
           <div
-            className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
-              selectedOperator === 'mtn'
+            className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${selectedOperator === 'mtn'
                 ? 'bg-yellow-50 border-yellow-200'
                 : 'bg-orange-50 border-orange-200'
-            }`}
+              }`}
           >
             <div>
               <p
-                className={`text-xs font-bold uppercase tracking-wider mb-0.5 ${
-                  selectedOperator === 'mtn' ? 'text-yellow-700' : 'text-orange-700'
-                }`}
+                className={`text-xs font-bold uppercase tracking-wider mb-0.5 ${selectedOperator === 'mtn' ? 'text-yellow-700' : 'text-orange-700'
+                  }`}
               >
                 {selectedOperator === 'mtn' ? 'MTN MoMo' : 'Orange Money'} — Envoyé vers
               </p>
               <p
-                className={`font-black text-lg font-mono ${
-                  selectedOperator === 'mtn' ? 'text-yellow-900' : 'text-orange-900'
-                }`}
+                className={`font-black text-lg font-mono ${selectedOperator === 'mtn' ? 'text-yellow-900' : 'text-orange-900'
+                  }`}
               >
                 {businessPhone}
               </p>
               <p
-                className={`text-sm font-black ${
-                  selectedOperator === 'mtn' ? 'text-yellow-800' : 'text-orange-800'
-                }`}
+                className={`text-sm font-black ${selectedOperator === 'mtn' ? 'text-yellow-800' : 'text-orange-800'
+                  }`}
               >
                 {amount.toLocaleString('fr-FR')} FCFA
               </p>
@@ -334,19 +329,17 @@ export function USSDPaymentFlow({
             <button
               type="button"
               onClick={handleCopyPhone}
-              className={`p-2.5 rounded-xl transition-colors shrink-0 ${
-                selectedOperator === 'mtn'
+              className={`p-2.5 rounded-xl transition-colors shrink-0 ${selectedOperator === 'mtn'
                   ? 'bg-yellow-200 hover:bg-yellow-300'
                   : 'bg-orange-200 hover:bg-orange-300'
-              }`}
+                }`}
             >
               {copiedPhone ? (
                 <CheckCircle2 className="w-4 h-4 text-green-700" />
               ) : (
                 <Copy
-                  className={`w-4 h-4 ${
-                    selectedOperator === 'mtn' ? 'text-yellow-700' : 'text-orange-700'
-                  }`}
+                  className={`w-4 h-4 ${selectedOperator === 'mtn' ? 'text-yellow-700' : 'text-orange-700'
+                    }`}
                 />
               )}
             </button>
