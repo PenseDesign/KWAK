@@ -72,7 +72,7 @@ export function USSDPaymentFlow({
   const ussdCode =
     selectedOperator === 'mtn'
       ? `*126*1*${MTN_PHONE}*${amount}#`
-      : `#150*4*${amount}*${ORANGE_PHONE}#`
+      : `#150*1*1*${amount}*${ORANGE_PHONE}#`
 
   const ussdLink =
     selectedOperator === 'mtn'

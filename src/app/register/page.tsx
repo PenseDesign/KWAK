@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signUp } from '@/app/actions'
 import { Lock, Mail, Loader2, ArrowRight, User, Home, Truck, Phone, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
@@ -32,6 +32,13 @@ export default function RegisterPage() {
     }
   }
 
+  // Redirection automatique vers /login après inscription réussie
+  useEffect(() => {
+    if (!success) return
+    const timer = setTimeout(() => router.push('/login'), 3000)
+    return () => clearTimeout(timer)
+  }, [success, router])
+
   if (success) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -39,12 +46,22 @@ export default function RegisterPage() {
           <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
             <Mail className="w-10 h-10" />
           </div>
-          <h2 className="text-3xl font-black text-slate-900">Votre compte a été créé avec succès !</h2>
+          <h2 className="text-3xl font-black text-slate-900">Compte créé avec succès !</h2>
           <p className="text-slate-500 font-medium leading-relaxed">
             Bienvenue sur la plateforme LEPOINCITOYEN.
           </p>
-          <Link href="/login" className="inline-block text-green-600 font-bold hover:underline">
-            Retour à la connexion
+          <p className="text-sm text-slate-400">
+            Redirection automatique vers la connexion…
+          </p>
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-green-500 h-1.5 rounded-full"
+              style={{ animation: 'progressShrink 3s linear forwards', width: '100%' }}
+            />
+          </div>
+          <style>{`@keyframes progressShrink { from { width: 100% } to { width: 0% } }`}</style>
+          <Link href="/login" className="inline-block text-green-600 font-bold hover:underline text-sm">
+            Aller à la connexion maintenant →
           </Link>
         </div>
       </div>
