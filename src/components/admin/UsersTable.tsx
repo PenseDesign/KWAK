@@ -33,10 +33,17 @@ export function UsersTable({ users }: { users: any[] }) {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any | null>(null)
   const [deletingUser, setDeletingUser] = useState<any | null>(null)
+  const [createRole, setCreateRole] = useState('client')
 
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+
+  const FORFAITS = [
+    { id: 'Mensuel Basique', label: 'Mensuel Basique', price: 2500, period: 'mois' },
+    { id: 'Mensuel Pro', label: 'Mensuel Pro', price: 3000, period: 'mois' },
+    { id: 'Hebdomadaire', label: 'Hebdomadaire', price: 700, period: 'semaine' },
+  ]
 
   const getRelativeTime = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -387,12 +394,12 @@ export function UsersTable({ users }: { users: any[] }) {
                 <Sparkles className="w-5 h-5" />
                 <h3 className="font-black text-slate-900 text-lg">Nouvel Utilisateur</h3>
               </div>
-              <button onClick={() => setIsCreateOpen(false)} className="p-2 hover:bg-slate-200 rounded-xl text-slate-400 hover:text-slate-700 transition-colors">
+              <button onClick={() => { setIsCreateOpen(false); setCreateRole('client') }} className="p-2 hover:bg-slate-200 rounded-xl text-slate-400 hover:text-slate-700 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </header>
 
-            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+            <form onSubmit={handleCreateSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
               {error && (
                 <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-semibold flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5" />
@@ -406,74 +413,139 @@ export function UsersTable({ users }: { users: any[] }) {
                 </div>
               )}
 
+              {/* ── Identité ── */}
               <div>
-                <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">E-mail (Requis)</label>
-                <input 
-                  type="email" 
-                  name="email" 
-                  required 
-                  placeholder="Ex : client@mail.com"
-                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Mot de passe (Requis)</label>
-                <input 
-                  type="password" 
-                  name="password" 
-                  required 
-                  placeholder="Minimum 6 caractères"
-                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Rôle</label>
-                  <select 
-                    name="role" 
-                    required 
-                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
-                  >
-                    <option value="client">Client</option>
-                    <option value="agent">Agent</option>
-                    <option value="pending_agent">Agent en attente</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Téléphone</label>
-                  <input 
-                    type="tel" 
-                    name="phone" 
-                    placeholder="Ex : 677000000"
-                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                  />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Identité</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Nom Complet</label>
+                    <input
+                      type="text"
+                      name="full_name"
+                      placeholder="Ex : Jean Dupont"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">E-mail (Requis)</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="Ex : client@mail.com"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Mot de passe (Requis)</label>
+                    <input
+                      type="password"
+                      name="password"
+                      required
+                      placeholder="Minimum 6 caractères"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* ── Rôle & Contact ── */}
               <div>
-                <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Adresse / Quartier / Repère</label>
-                <input 
-                  type="text" 
-                  name="repere_textuel" 
-                  placeholder="Ex : Akwa, face boulangerie Z"
-                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Rôle & Contact</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Rôle</label>
+                    <select
+                      name="role"
+                      required
+                      value={createRole}
+                      onChange={(e) => setCreateRole(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
+                    >
+                      <option value="client">Client</option>
+                      <option value="agent">Agent</option>
+                      <option value="pending_agent">Agent en attente</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Téléphone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      placeholder="Ex : 677000000"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* ── Adresse ── */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Adresse de collecte</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Quartier</label>
+                    <input
+                      type="text"
+                      name="quartier"
+                      placeholder="Ex : Akwa, Bonanjo..."
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Repère / Adresse détaillée</label>
+                    <input
+                      type="text"
+                      name="repere_textuel"
+                      placeholder="Ex : Akwa, face boulangerie Z"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Abonnement (uniquement pour les clients) ── */}
+              {createRole === 'client' && (
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-green-700">Abonnement (Optionnel)</p>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Activez immédiatement un forfait pour ce client. Sans sélection, le compte sera créé sans abonnement.
+                  </p>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Forfait</label>
+                    <select
+                      name="type_forfait"
+                      className="w-full px-4 py-3 bg-white border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
+                    >
+                      <option value="">— Aucun abonnement —</option>
+                      {FORFAITS.map(f => (
+                        <option key={f.id} value={f.id}>
+                          {f.label} — {f.price.toLocaleString()} FCFA / {f.period}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+                    <span className="text-green-600">✓</span>
+                    L'abonnement sera activé immédiatement avec les jours de passage par défaut.
+                  </div>
+                </div>
+              )}
 
               <footer className="pt-4 border-t border-green-200 flex gap-4">
-                <button 
-                  type="button" 
-                  onClick={() => setIsCreateOpen(false)}
+                <button
+                  type="button"
+                  onClick={() => { setIsCreateOpen(false); setCreateRole('client') }}
                   className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl font-bold text-sm transition-colors"
                 >
                   Annuler
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isPending}
                   className="w-2/3 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
                 >
@@ -513,43 +585,79 @@ export function UsersTable({ users }: { users: any[] }) {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Rôle</label>
-                  <select 
-                    name="role" 
-                    defaultValue={editingUser.role}
-                    required 
-                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
-                  >
-                    <option value="client">Client</option>
-                    <option value="agent">Agent</option>
-                    <option value="pending_agent">Agent en attente</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Téléphone</label>
-                  <input 
-                    type="tel" 
-                    name="phone" 
-                    defaultValue={editingUser.phone || ''}
-                    placeholder="Ex : 677000000"
-                    className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                  />
+              {/* ── Identité ── */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Identité</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Nom Complet</label>
+                    <input
+                      type="text"
+                      name="full_name"
+                      defaultValue={editingUser.full_name || ''}
+                      placeholder="Ex : Jean Dupont"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
                 </div>
               </div>
 
+              {/* ── Rôle & Contact ── */}
               <div>
-                <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Adresse / Quartier / Repère</label>
-                <input 
-                  type="text" 
-                  name="repere_textuel" 
-                  defaultValue={editingUser.repere_textuel || ''}
-                  placeholder="Ex : Akwa, face boulangerie Z"
-                  className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
-                />
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Rôle & Contact</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Rôle</label>
+                    <select
+                      name="role"
+                      defaultValue={editingUser.role}
+                      required
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-700 text-sm font-bold"
+                    >
+                      <option value="client">Client</option>
+                      <option value="agent">Agent</option>
+                      <option value="pending_agent">Agent en attente</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Téléphone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      defaultValue={editingUser.phone || ''}
+                      placeholder="Ex : 677000000"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Adresse ── */}
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Adresse de collecte</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Quartier</label>
+                    <input
+                      type="text"
+                      name="quartier"
+                      defaultValue={editingUser.quartier || ''}
+                      placeholder="Ex : Akwa, Bonanjo..."
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase text-slate-400 tracking-wider mb-2 ml-1">Repère / Adresse détaillée</label>
+                    <input
+                      type="text"
+                      name="repere_textuel"
+                      defaultValue={editingUser.repere_textuel || ''}
+                      placeholder="Ex : Akwa, face boulangerie Z"
+                      className="w-full px-4 py-3 bg-slate-50 border border-green-300 rounded-xl focus:ring-2 focus:ring-green-500/20 focus:border-green-500 outline-none text-slate-900 text-sm font-medium"
+                    />
+                  </div>
+                </div>
               </div>
 
               <footer className="pt-4 border-t border-green-200 flex gap-4">

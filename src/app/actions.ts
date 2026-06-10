@@ -786,12 +786,16 @@ export async function adminCreateUser(formData: FormData) {
   const password = formData.get('password') as string
   const phone = formData.get('phone') as string
   const role = formData.get('role') as string
+  const full_name = formData.get('full_name') as string
+  const quartier = formData.get('quartier') as string
   const repere_textuel = formData.get('repere_textuel') as string
+  const type_forfait = formData.get('type_forfait') as string | null
 
   if (!email || !password || !role) {
     return { success: false, error: 'L\'e-mail, le mot de passe et le rôle sont obligatoires.' }
   }
 
+  // ── Étape 1 : Créer le compte Auth + profil de base ──────────────────────────
   const { data: newUserId, error } = await supabase.rpc('create_user_by_admin', {
     user_email: email,
     user_password: password,
@@ -802,6 +806,47 @@ export async function adminCreateUser(formData: FormData) {
 
   if (error) {
     return { success: false, error: error.message }
+  }
+
+  // ── Étape 2 : Compléter le profil avec nom complet et quartier ────────────────
+  if (newUserId && (full_name || quartier)) {
+    const adminClient = createAdminClient()
+    await adminClient
+      .from('profiles')
+      .update({
+        ...(full_name ? { full_name } : {}),
+        ...(quartier ? { quartier } : {}),
+      })
+      .eq('id', newUserId)
+  }
+
+  // ── Étape 3 : Créer l'abonnement directement si un forfait est choisi ─────────
+  if (newUserId && role === 'client' && type_forfait && type_forfait !== '') {
+    const now = new Date()
+    const dateDebut = now.toISOString().split('T')[0]
+    const dateFin = new Date(now)
+
+    if (type_forfait === 'Hebdomadaire') {
+      dateFin.setDate(dateFin.getDate() + 7)
+    } else {
+      // Mensuel Basique ou Mensuel Pro
+      dateFin.setMonth(dateFin.getMonth() + 1)
+    }
+
+    // Jours de passage par défaut selon le forfait
+    const joursPassage = type_forfait === 'Mensuel Pro' ? [3, 4, 6] : [3, 6] // Mer, (Jeu), Sam
+
+    const adminClient = createAdminClient()
+    await adminClient
+      .from('abonnements')
+      .upsert({
+        client_id: newUserId,
+        type_forfait,
+        status: 'actif',
+        date_debut: dateDebut,
+        date_fin: dateFin.toISOString().split('T')[0],
+        jours_passage: joursPassage,
+      }, { onConflict: 'client_id' })
   }
 
   revalidatePath('/admin')
@@ -827,6 +872,8 @@ export async function adminUpdateUser(userId: string, formData: FormData) {
 
   const phone = formData.get('phone') as string
   const role = formData.get('role') as string
+  const full_name = formData.get('full_name') as string
+  const quartier = formData.get('quartier') as string
   const repere_textuel = formData.get('repere_textuel') as string
 
   if (!role) {
@@ -838,6 +885,8 @@ export async function adminUpdateUser(userId: string, formData: FormData) {
     .update({
       phone: phone || null,
       role: role,
+      full_name: full_name || null,
+      quartier: quartier || null,
       repere_textuel: repere_textuel || null
     })
     .eq('id', userId)
