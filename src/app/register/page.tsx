@@ -19,15 +19,19 @@ export default function RegisterPage() {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    formData.append('role', role)
-    const result = await signUp(formData)
+    try {
+      const formData = new FormData(e.currentTarget)
+      formData.append('role', role)
+      const result = await signUp(formData)
 
-    if (result?.error) {
-      setError(result.error)
-      setLoading(false)
-    } else {
-      setSuccess(true)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+      }
+    } catch (err: any) {
+      setError('Une erreur inattendue est survenue. Veuillez réessayer.')
+    } finally {
       setLoading(false)
     }
   }
