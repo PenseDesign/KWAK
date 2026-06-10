@@ -75,9 +75,9 @@ const FORFAITS = [
   {
     id: 'Hebdomadaire',
     label: 'Hebdomadaire',
-    price: 700,
-    period: 'semaine',
-    passages: '2 passages / semaine',
+    price: 1000,
+    period: 'mois',
+    passages: '2 passages / mois',
     bagsPerPassage: 2,
     color: 'from-slate-700 to-slate-800',
     accent: 'text-blue-300',
@@ -87,8 +87,8 @@ const FORFAITS = [
     highlight: 'Sans engagement',
     features: [
       '1 sacs poubelles / passage',
-      '2 ramassages par semaine',
-      'Renouvelable chaque semaine',
+      '2 ramassages par mois',
+      'Renouvelable chaque mois',
       'Sans engagement',
     ],
   },
