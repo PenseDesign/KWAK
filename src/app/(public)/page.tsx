@@ -16,7 +16,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <Image src="/logo.jpeg" alt="LePointCitoyen" width={140} height={140} className="rounded-xl" />
+              <Image src="/logo.png" alt="LePointCitoyen" width={140} height={140} className="rounded-xl" />
               <span className="text-xl font-black tracking-tighter text-slate-900">LEPOINCITOYEN</span>
             </div>
 
@@ -277,7 +277,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-12 mb-16 text-center md:text-left">
             <div className="space-y-6">
               <div className="flex items-center gap-2 justify-center md:justify-start">
-                <Image src="/logo.jpeg" alt="LePointCitoyen" width={60} height={60} className="rounded-lg" />
+                <Image src="/logo.png" alt="LePointCitoyen" width={60} height={60} className="rounded-lg" />
                 <span className="text-xl font-black tracking-tighter">LEPOINCITOYEN</span>
               </div>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">

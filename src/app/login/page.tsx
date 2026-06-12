@@ -6,13 +6,7 @@ import { Lock, Loader2, ArrowRight, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-// Fonction de détection robuste pour intercepter les redirections Next.js
-function isRedirectError(error: any): boolean {
-  return (
-    error?.digest?.toString().startsWith('NEXT_REDIRECT') ||
-    error?.message === 'NEXT_REDIRECT'
-  )
-}
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)

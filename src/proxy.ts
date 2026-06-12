@@ -46,7 +46,6 @@ export async function proxy(request: NextRequest) {
         pathname === '/sw.js' ||
         pathname === '/icon-192.png' ||
         pathname === '/icon-512.png' ||
-        pathname === '/logo.jpeg' ||
         pathname === '/logo.png'
 
     // Si non connecté et pas public → login
