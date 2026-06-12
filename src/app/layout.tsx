@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   title: "LEPOINCITOYEN — Précollecte et Valorisation Responsable",
   description: "Plateforme intelligente de précollecte des déchets. Connecte les ménages aux agents de collecte pour une ville plus propre.",
   icons: {
-    icon: "/logo.jpeg",
-    apple: "/icon-512.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

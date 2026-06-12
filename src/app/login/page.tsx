@@ -47,7 +47,7 @@ export default function LoginPage() {
         {/* Logo & Header */}
         <div className="text-center space-y-4">
           <Link href="/" className="inline-block">
-            <Image src="/logo.jpeg" alt="LePointCitoyen" width={140} height={140} />
+            <Image src="/logo.png" alt="LePointCitoyen" width={140} height={140} />
           </Link>
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bienvenue sur LEPOINCITOYEN</h1>

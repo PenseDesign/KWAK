@@ -79,7 +79,7 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center space-y-4">
           <Link href="/" className="inline-block">
-            <Image src="/logo.jpeg" alt="LePointCitoyen" width={100} height={100} />
+            <Image src="/logo.png" alt="LePointCitoyen" width={100} height={100} />
           </Link>
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Créer un compte</h1>
