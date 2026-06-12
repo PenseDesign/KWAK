@@ -6,7 +6,13 @@ import { Lock, Loader2, ArrowRight, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-import { isRedirectError } from 'next/dist/client/components/redirect'
+// Fonction de détection robuste pour intercepter les redirections Next.js
+function isRedirectError(error: any): boolean {
+  return (
+    error?.digest?.toString().startsWith('NEXT_REDIRECT') ||
+    error?.message === 'NEXT_REDIRECT'
+  )
+}
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
@@ -27,7 +33,7 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       if (isRedirectError(err)) {
-        throw err // Laisse Next.js gérer la redirection normale
+        throw err // Relance l'erreur pour que Next.js exécute la redirection
       }
       setError('Une erreur est survenue (probablement une configuration serveur manquante).')
       setLoading(false)
