@@ -6,6 +6,8 @@ import { Lock, Loader2, ArrowRight, Phone } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { isRedirectError } from 'next/dist/client/components/redirect'
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -15,11 +17,19 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const result = await signIn(formData)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const result = await signIn(formData)
 
-    if (result?.error) {
-      setError(result.error)
+      if (result?.error) {
+        setError(result.error)
+        setLoading(false)
+      }
+    } catch (err: any) {
+      if (isRedirectError(err)) {
+        throw err // Laisse Next.js gérer la redirection normale
+      }
+      setError('Une erreur est survenue (probablement une configuration serveur manquante).')
       setLoading(false)
     }
   }
