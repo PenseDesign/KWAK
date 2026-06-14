@@ -242,7 +242,7 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                   </div>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                    <input name="email" type="email" required placeholder="Email *"
+                    <input name="email" type="email" placeholder="Email (optionnel)"
                       className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20" />
                   </div>
                 </div>

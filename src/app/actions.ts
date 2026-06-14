@@ -1072,16 +1072,16 @@ export async function adminCreateCashAbonnement(formData: FormData) {
   }
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const email       = formData.get('email') as string
   const phone       = formData.get('phone') as string
+  const email       = (formData.get('email') as string)?.trim() || `${phone.replace(/\s+/g, '')}@kwak.local`
   const full_name   = formData.get('full_name') as string
   const quartier    = formData.get('quartier') as string
   const repere      = formData.get('repere_textuel') as string
   const type_forfait = formData.get('type_forfait') as string
   const montant_recu = parseInt(formData.get('montant_recu') as string, 10)
 
-  if (!email || !phone || !full_name || !type_forfait) {
-    return { success: false, error: 'Nom, téléphone, email et forfait sont obligatoires.' }
+  if (!phone || !full_name || !type_forfait) {
+    return { success: false, error: 'Nom, téléphone et forfait sont obligatoires.' }
   }
 
   // ── Mot de passe auto-généré (affiché sur le reçu) ───────────────────────────
