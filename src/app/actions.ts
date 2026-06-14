@@ -1048,3 +1048,134 @@ export async function getClientsByZone(zonePrefix: string) {
   if (error) return { success: false, clients: [] }
   return { success: true, clients: data }
 }
+
+// ================================================================
+// PAIEMENT EN MAIN PROPRE (CASH) — Création compte + reçu PDF
+// ================================================================
+
+export async function adminCreateCashAbonnement(formData: FormData) {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+
+  // ── Vérification admin ────────────────────────────────────────────────────────
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('role, full_name')
+    .eq('id', user.id)
+    .single()
+
+  if (!adminProfile || adminProfile.role !== 'admin') {
+    return { success: false, error: 'Action réservée aux administrateurs.' }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const email       = formData.get('email') as string
+  const phone       = formData.get('phone') as string
+  const full_name   = formData.get('full_name') as string
+  const quartier    = formData.get('quartier') as string
+  const repere      = formData.get('repere_textuel') as string
+  const type_forfait = formData.get('type_forfait') as string
+  const montant_recu = parseInt(formData.get('montant_recu') as string, 10)
+
+  if (!email || !phone || !full_name || !type_forfait) {
+    return { success: false, error: 'Nom, téléphone, email et forfait sont obligatoires.' }
+  }
+
+  // ── Mot de passe auto-généré (affiché sur le reçu) ───────────────────────────
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+  const generatedPassword = Array.from({ length: 8 }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length))
+  ).join('')
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Étape 1 : Créer le compte Auth ───────────────────────────────────────────
+  const { data: newUserId, error: createError } = await supabase.rpc('create_user_by_admin', {
+    user_email: email,
+    user_password: generatedPassword,
+    user_phone: phone || null,
+    user_role: 'client',
+    user_repere_textuel: repere || null,
+  })
+
+  if (createError || !newUserId) {
+    return { success: false, error: createError?.message || 'Impossible de créer le compte.' }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Étape 2 : Compléter le profil ────────────────────────────────────────────
+  await adminClient
+    .from('profiles')
+    .update({
+      full_name: full_name || null,
+      quartier: quartier || null,
+      repere_textuel: repere || null,
+    })
+    .eq('id', newUserId)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Étape 3 : Calculer les dates de l'abonnement ─────────────────────────────
+  const MONTANTS: Record<string, number> = {
+    'Mensuel Basique': 2500,
+    'Mensuel Pro': 3000,
+    'Hebdomadaire': 1000,
+  }
+
+  const now = new Date()
+  const dateDebut = now.toISOString().split('T')[0]
+  const dateFin = new Date(now)
+  if (type_forfait === 'Hebdomadaire') {
+    dateFin.setDate(dateFin.getDate() + 7)
+  } else {
+    dateFin.setMonth(dateFin.getMonth() + 1)
+  }
+  const joursPassage = type_forfait === 'Mensuel Pro' ? [3, 4, 6] : [3, 6]
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Étape 4 : Activer l'abonnement ───────────────────────────────────────────
+  const { error: aboError } = await adminClient
+    .from('abonnements')
+    .upsert({
+      client_id: newUserId,
+      type_forfait,
+      status: 'actif',
+      date_debut: dateDebut,
+      date_fin: dateFin.toISOString().split('T')[0],
+      jours_passage: joursPassage,
+    }, { onConflict: 'client_id' })
+
+  if (aboError) {
+    return { success: false, error: `Compte créé mais abonnement échoué : ${aboError.message}` }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Étape 5 : Générer le numéro de reçu ──────────────────────────────────────
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+  const randSuffix = Math.floor(1000 + Math.random() * 9000)
+  const receiptNumber = `RCP-${dateStr}-${randSuffix}`
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  revalidatePath('/admin')
+
+  return {
+    success: true,
+    receipt: {
+      receiptNumber,
+      clientName: full_name,
+      clientPhone: phone,
+      clientEmail: email,
+      clientAddress: repere || '',
+      clientQuartier: quartier || '',
+      forfait: type_forfait,
+      montant: montant_recu || MONTANTS[type_forfait] || 0,
+      dateDebut,
+      dateFin: dateFin.toISOString().split('T')[0],
+      dateEmission: now.toISOString(),
+      modePaiement: 'Espèces / En main propre',
+      validePar: adminProfile.full_name || 'Administrateur',
+      generatedPassword,
+    },
+  }
+}

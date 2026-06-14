@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { adminCreateUser, adminUpdateUser, adminDeleteUser } from '../../app/actions'
 import { useRouter } from 'next/navigation'
+import { CashAbonnementModal } from './CashAbonnementModal'
 
 export function UsersTable({ users }: { users: any[] }) {
   const router = useRouter()
@@ -31,6 +32,7 @@ export function UsersTable({ users }: { users: any[] }) {
 
   // Modals state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isCashModalOpen, setIsCashModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any | null>(null)
   const [deletingUser, setDeletingUser] = useState<any | null>(null)
   const [createRole, setCreateRole] = useState('client')
@@ -160,13 +162,21 @@ export function UsersTable({ users }: { users: any[] }) {
             {users.length} comptes inscrits dans la base de données
           </p>
         </div>
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-xl shadow-lg shadow-green-100 transition-all text-sm active:scale-[0.98]"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un utilisateur
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCashModalOpen(true)}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-5 rounded-xl shadow-lg shadow-amber-100 transition-all text-sm active:scale-[0.98]"
+          >
+            💵 Abonnement Cash
+          </button>
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-xl shadow-lg shadow-green-100 transition-all text-sm active:scale-[0.98]"
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter un utilisateur
+          </button>
+        </div>
       </div>
 
       {/* Mini-stats counters */}
@@ -384,6 +394,14 @@ export function UsersTable({ users }: { users: any[] }) {
           )}
         </div>
       </div>
+
+      {/* CASH ABONNEMENT MODAL */}
+      {isCashModalOpen && (
+        <CashAbonnementModal
+          onClose={() => setIsCashModalOpen(false)}
+          onSuccess={() => router.refresh()}
+        />
+      )}
 
       {/* CREATE MODAL */}
       {isCreateOpen && (

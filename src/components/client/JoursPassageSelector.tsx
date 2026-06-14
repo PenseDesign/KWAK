@@ -7,7 +7,7 @@ import { updateJoursPassage } from '../../app/actions'
 const DAYS = [
   { id: 3, name: 'Mercredi' },
   { id: 4, name: 'Jeudi' },
-  { id: 6, name: 'Samedi' },
+  { id: 6, name: 'Samedi soir' },
   { id: 0, name: 'Dimanche' }
 ]
 
@@ -73,11 +73,10 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
             <button
               key={day.id}
               onClick={() => toggleDay(day.id)}
-              className={`flex-1 min-w-[100px] py-3 px-4 rounded-2xl font-bold transition-all border-2 text-sm flex items-center justify-center gap-2 ${
-                isSelected
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
-                  : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'
-              }`}
+              className={`flex-1 min-w-[100px] py-3 px-4 rounded-2xl font-bold transition-all border-2 text-sm flex items-center justify-center gap-2 ${isSelected
+                ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm'
+                : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-blue-200 hover:bg-blue-50/50'
+                }`}
             >
               {isSelected && <CheckCircle2 className="w-4 h-4" />}
               {day.name}
@@ -87,9 +86,8 @@ export function JoursPassageSelector({ initialJours = [], typeForfait }: { initi
       </div>
 
       {message && (
-        <div className={`p-4 rounded-2xl text-sm font-bold mb-6 ${
-          message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-        }`}>
+        <div className={`p-4 rounded-2xl text-sm font-bold mb-6 ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          }`}>
           {message.text}
         </div>
       )}
