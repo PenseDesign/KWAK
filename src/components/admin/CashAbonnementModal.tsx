@@ -4,13 +4,13 @@ import { useState, useTransition } from 'react'
 import { adminCreateCashAbonnement } from '@/app/actions'
 import {
   X, Loader2, AlertTriangle, CheckCircle2, Download,
-  User, Phone, Mail, MapPin, Banknote, FileText, Lock, Home
+  User, Phone, Mail, MapPin, Banknote, FileText, Lock, Home, Calendar
 } from 'lucide-react'
 
 const FORFAITS = [
   { id: 'Mensuel Basique', label: 'Mensuel Basique', price: 2500 },
-  { id: 'Mensuel Pro',     label: 'Mensuel Pro',     price: 3000 },
-  { id: 'Hebdomadaire',    label: 'Hebdomadaire',    price: 1000 },
+  { id: 'Mensuel Pro', label: 'Mensuel Pro', price: 3000 },
+  { id: 'Hebdomadaire', label: 'Hebdomadaire', price: 1000 },
 ]
 
 type Receipt = {
@@ -52,11 +52,11 @@ async function downloadReceiptPDF(receipt: Receipt) {
   let y = margin
 
   // ── Couleurs
-  const green  = [22, 163, 74]   as [number,number,number]
-  const dark   = [15,  23, 42]   as [number,number,number]
-  const grey   = [100,116,139]   as [number,number,number]
-  const light  = [241,245,249]   as [number,number,number]
-  const white  = [255,255,255]   as [number,number,number]
+  const green = [22, 163, 74] as [number, number, number]
+  const dark = [15, 23, 42] as [number, number, number]
+  const grey = [100, 116, 139] as [number, number, number]
+  const light = [241, 245, 249] as [number, number, number]
+  const white = [255, 255, 255] as [number, number, number]
 
   // ── Header vert
   doc.setFillColor(...green)
@@ -286,6 +286,19 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                   key={selectedForfait.id}
                   placeholder="Montant reçu (FCFA)"
                   className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20" />
+              </div>
+
+              {/* Date de début */}
+              <div className="relative mt-3">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                <input
+                  name="date_debut"
+                  type="date"
+                  required
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                />
+                <p className="text-[10px] text-slate-400 font-medium mt-1 pl-1">Date de début de l'abonnement</p>
               </div>
             </div>
 

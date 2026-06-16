@@ -1124,8 +1124,11 @@ export async function adminCreateCashAbonnement(formData: FormData) {
   }
 
   const now = new Date()
-  const dateDebut = now.toISOString().split('T')[0]
-  const dateFin = new Date(now)
+  // Utiliser la date saisie par l'admin, ou aujourd'hui par défaut
+  const dateDebutInput = (formData.get('date_debut') as string)?.trim()
+  const baseDate = dateDebutInput ? new Date(dateDebutInput + 'T00:00:00') : now
+  const dateDebut = baseDate.toISOString().split('T')[0]
+  const dateFin = new Date(baseDate)
   if (type_forfait === 'Hebdomadaire') {
     dateFin.setDate(dateFin.getDate() + 7)
   } else {
