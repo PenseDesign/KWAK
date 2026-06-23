@@ -322,24 +322,36 @@ export async function signUp(formData: FormData) {
   if (existingPhone) {
     return { success: false, error: 'Ce numéro de téléphone est déjà associé à un compte.' }
   }
-  
+
   const supabase = await createClient()
 
+  // On passe les metadata pour que le trigger les capture aussi
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: { full_name, role },
+    },
   })
 
   if (error) return { success: false, error: error.message }
 
   if (data.user) {
-    // Créer le profil avec le rôle, le téléphone, le nom et l'email
-    // L'email est stocké dans profiles pour permettre la connexion par téléphone
-    const { error: profileError } = await supabase
+    // IMPORTANT : On utilise l'adminClient (service role) pour bypasser le RLS.
+    // Au moment du signUp côté serveur Next.js, la session n'est pas encore
+    // pleinement établie, donc auth.uid() retourne null et le RLS bloque
+    // l'upsert avec le client normal. L'adminClient contourne ce problème.
+    const { error: profileError } = await adminClient
       .from('profiles')
-      .upsert({ id: data.user.id, role, phone, full_name, email })
+      .upsert(
+        { id: data.user.id, role, phone, full_name, email },
+        { onConflict: 'id' }
+      )
 
-    if (profileError) console.error('Error updating profile:', profileError)
+    if (profileError) {
+      console.error('[signUp] Erreur upsert profil:', profileError)
+      return { success: false, error: 'Compte créé mais profil non enregistré : ' + profileError.message }
+    }
   }
 
   return { success: true }
@@ -1052,6 +1064,112 @@ export async function getClientsByZone(zonePrefix: string) {
 // ================================================================
 // PAIEMENT EN MAIN PROPRE (CASH) — Création compte + reçu PDF
 // ================================================================
+
+export async function adminRenewCashAbonnement(formData: FormData) {
+  const supabase = await createClient()
+  const adminClient = createAdminClient()
+
+  // ── Vérification admin ────────────────────────────────────────────────────────
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Non authentifié' }
+
+  const { data: adminProfile } = await supabase
+    .from('profiles')
+    .select('role, full_name')
+    .eq('id', user.id)
+    .single()
+
+  if (!adminProfile || adminProfile.role !== 'admin') {
+    return { success: false, error: 'Action réservée aux administrateurs.' }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  const phone        = (formData.get('phone') as string)?.trim()
+  const type_forfait = formData.get('type_forfait') as string
+  const montant_recu = parseInt(formData.get('montant_recu') as string, 10)
+
+  if (!phone || !type_forfait) {
+    return { success: false, error: 'Téléphone et forfait sont obligatoires.' }
+  }
+
+  // ── Trouver le client par téléphone ──────────────────────────────────────────
+  const { data: clientProfile, error: lookupError } = await adminClient
+    .from('profiles')
+    .select('id, full_name, phone, email, quartier, repere_textuel')
+    .eq('phone', phone)
+    .maybeSingle()
+
+  if (lookupError || !clientProfile) {
+    return { success: false, error: `Aucun compte trouvé avec le numéro ${phone}. Utilisez le mode "Nouveau client" pour créer un compte.` }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Calculer les nouvelles dates ──────────────────────────────────────────────
+  const MONTANTS: Record<string, number> = {
+    'Mensuel Basique': 2500,
+    'Mensuel Pro': 3000,
+    'Hebdomadaire': 1000,
+  }
+
+  const now = new Date()
+  const dateDebutInput = (formData.get('date_debut') as string)?.trim()
+  const baseDate = dateDebutInput ? new Date(dateDebutInput + 'T00:00:00') : now
+  const dateDebut = baseDate.toISOString().split('T')[0]
+  const dateFin = new Date(baseDate)
+  if (type_forfait === 'Hebdomadaire') {
+    dateFin.setDate(dateFin.getDate() + 7)
+  } else {
+    dateFin.setMonth(dateFin.getMonth() + 1)
+  }
+  const joursPassage = type_forfait === 'Mensuel Pro' ? [3, 4, 6] : [3, 6]
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Renouveler l'abonnement (upsert sur le compte existant) ──────────────────
+  const { error: aboError } = await adminClient
+    .from('abonnements')
+    .upsert({
+      client_id: clientProfile.id,
+      type_forfait,
+      status: 'actif',
+      date_debut: dateDebut,
+      date_fin: dateFin.toISOString().split('T')[0],
+      jours_passage: joursPassage,
+    }, { onConflict: 'client_id' })
+
+  if (aboError) {
+    return { success: false, error: `Renouvellement échoué : ${aboError.message}` }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── Générer le numéro de reçu ─────────────────────────────────────────────────
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '')
+  const randSuffix = Math.floor(1000 + Math.random() * 9000)
+  const receiptNumber = `RCP-RNW-${dateStr}-${randSuffix}`
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  revalidatePath('/admin')
+
+  return {
+    success: true,
+    receipt: {
+      receiptNumber,
+      clientName: clientProfile.full_name || clientProfile.phone,
+      clientPhone: clientProfile.phone,
+      clientEmail: clientProfile.email || '',
+      clientAddress: clientProfile.repere_textuel || '',
+      clientQuartier: clientProfile.quartier || '',
+      forfait: type_forfait,
+      montant: montant_recu || MONTANTS[type_forfait] || 0,
+      dateDebut,
+      dateFin: dateFin.toISOString().split('T')[0],
+      dateEmission: now.toISOString(),
+      modePaiement: 'Espèces / Renouvellement',
+      validePar: adminProfile.full_name || 'Administrateur',
+      generatedPassword: '', // Pas de nouveau mot de passe pour un renouvellement
+    },
+  }
+}
+
 
 export async function adminCreateCashAbonnement(formData: FormData) {
   const supabase = await createClient()

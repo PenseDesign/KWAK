@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { adminCreateCashAbonnement } from '@/app/actions'
+import { adminCreateCashAbonnement, adminRenewCashAbonnement } from '@/app/actions'
 import {
   X, Loader2, AlertTriangle, CheckCircle2, Download,
   User, Phone, Mail, MapPin, Banknote, FileText, Lock, Home, Calendar
@@ -170,6 +170,7 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
   onSuccess: () => void
 }) {
   const [step, setStep] = useState<'form' | 'receipt'>('form')
+  const [mode, setMode] = useState<'nouveau' | 'renouvellement'>('nouveau')
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selectedForfait, setSelectedForfait] = useState(FORFAITS[0])
@@ -180,7 +181,8 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
     setError(null)
     const formData = new FormData(e.currentTarget)
     startTransition(async () => {
-      const res = await adminCreateCashAbonnement(formData)
+      const action = mode === 'renouvellement' ? adminRenewCashAbonnement : adminCreateCashAbonnement
+      const res = await action(formData)
       if (res.success && res.receipt) {
         setReceipt(res.receipt as Receipt)
         setStep('receipt')
@@ -220,14 +222,37 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
         {/* ── ÉTAPE 1 : FORMULAIRE ── */}
         {step === 'form' && (
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+
+            {/* Toggle Mode */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+              <button type="button" onClick={() => { setMode('nouveau'); setError(null) }}
+                className={`py-2.5 rounded-lg text-xs font-black transition-all ${
+                  mode === 'nouveau' ? 'bg-white text-green-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}>
+                ✨ Nouveau client
+              </button>
+              <button type="button" onClick={() => { setMode('renouvellement'); setError(null) }}
+                className={`py-2.5 rounded-lg text-xs font-black transition-all ${
+                  mode === 'renouvellement' ? 'bg-white text-amber-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}>
+                🔄 Renouvellement
+              </button>
+            </div>
+
+            {mode === 'renouvellement' && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700 font-medium">
+                🔍 Entrez le numéro de téléphone du client existant. Son compte sera retrouvé automatiquement.
+              </div>
+            )}
+
             {error && (
               <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 shrink-0" /> {error}
               </div>
             )}
 
-            {/* Identité */}
-            <div>
+            {/* Identité — seulement pour nouveau client */}
+            {mode === 'nouveau' && <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1.5">
                 <User className="w-3 h-3" /> Identité du client
               </p>
@@ -247,10 +272,10 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                   </div>
                 </div>
               </div>
-            </div>
+            </div>}
 
-            {/* Adresse */}
-            <div>
+            {/* Adresse — seulement pour nouveau client */}
+            {mode === 'nouveau' && <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1.5">
                 <Home className="w-3 h-3" /> Adresse de collecte
               </p>
@@ -263,7 +288,21 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                     className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20" />
                 </div>
               </div>
-            </div>
+            </div>}
+
+            {/* Téléphone — seulement pour renouvellement */}
+            {mode === 'renouvellement' && (
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1.5">
+                  <Phone className="w-3 h-3" /> Téléphone du client
+                </p>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                  <input name="phone" type="tel" required placeholder="Ex: 677656873"
+                    className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" />
+                </div>
+              </div>
+            )}
 
             {/* Forfait */}
             <div>
@@ -302,13 +341,15 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
               </div>
             </div>
 
-            {/* Info mot de passe auto */}
-            <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-              <Lock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-              <p className="text-xs text-amber-700 font-medium">
-                Un mot de passe temporaire sera auto-généré et <strong>imprimé sur le reçu PDF</strong> à remettre au client.
-              </p>
-            </div>
+            {/* Info mot de passe auto — seulement pour nouveau client */}
+            {mode === 'nouveau' && (
+              <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                <Lock className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                <p className="text-xs text-amber-700 font-medium">
+                  Un mot de passe temporaire sera auto-généré et <strong>imprimé sur le reçu PDF</strong> à remettre au client.
+                </p>
+              </div>
+            )}
 
             <div className="pt-2 flex gap-3">
               <button type="button" onClick={onClose}
@@ -316,9 +357,11 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                 Annuler
               </button>
               <button type="submit" disabled={isPending}
-                className="w-2/3 bg-green-600 hover:bg-green-700 text-white py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-green-100 disabled:opacity-60">
+                className={`w-2/3 text-white py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg disabled:opacity-60 ${
+                  mode === 'renouvellement' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-100' : 'bg-green-600 hover:bg-green-700 shadow-green-100'
+                }`}>
                 {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                {isPending ? 'Création en cours…' : 'Créer & Activer'}
+                {isPending ? (mode === 'renouvellement' ? 'Renouvellement…' : 'Création en cours…') : (mode === 'renouvellement' ? 'Renouveler & Imprimer' : 'Créer & Activer')}
               </button>
             </div>
           </form>
@@ -385,17 +428,19 @@ export function CashAbonnementModal({ onClose, onSuccess }: {
                   </div>
                 </div>
 
-                {/* Mot de passe */}
-                <div className="p-4 bg-amber-50 border-t border-dashed border-amber-200">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2">Accès à l'application</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-slate-600 font-medium">Se connecte avec son numéro de téléphone</p>
-                      <p className="text-xs text-slate-500">Mot de passe temporaire :</p>
+                {/* Mot de passe — uniquement pour les nouveaux comptes */}
+                {receipt.generatedPassword && (
+                  <div className="p-4 bg-amber-50 border-t border-dashed border-amber-200">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-2">Accès à l'application</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-slate-600 font-medium">Se connecte avec son numéro de téléphone</p>
+                        <p className="text-xs text-slate-500">Mot de passe temporaire :</p>
+                      </div>
+                      <code className="bg-white border border-amber-200 text-amber-700 font-black text-lg px-3 py-1 rounded-xl tracking-widest">{receipt.generatedPassword}</code>
                     </div>
-                    <code className="bg-white border border-amber-200 text-amber-700 font-black text-lg px-3 py-1 rounded-xl tracking-widest">{receipt.generatedPassword}</code>
                   </div>
-                </div>
+                )}
 
                 {/* Validé par */}
                 <div className="p-4 bg-slate-50 border-t border-dashed border-slate-200 flex justify-between items-end">
